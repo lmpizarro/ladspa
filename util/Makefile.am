@@ -1,13 +1,14 @@
 LIBTOOL=libtool
 RANLIB=ranlib
 
-noinst_HEADERS = rms.h db.h blo.h pitchscale.h waveguide_nl.h biquad.h iir.h buffer.h ls_filter.h
+noinst_HEADERS = filters.h rms.h db.h blo.h pitchscale.h waveguide_nl.h biquad.h iir.h buffer.h ls_filter.h
 
-noinst_LIBRARIES = librms.a libdb.a libblo.a libpitchscale.a libiir.a
+noinst_LIBRARIES = libfilters.a librms.a libdb.a libblo.a libpitchscale.a libiir.a
 
 librms_a_SOURCES = rms.c
 libdb_a_SOURCES = db.c
 libblo_a_SOURCES = blo.c
+libfilters_a_SOURCES = filters.c
 libblo_a_CFLAGS = -I@top_srcdir@
 libpitchscale_a_SOURCES = pitchscale.c
 libpitchscale_a_CFLAGS = $(FFTW_CFLAGS)

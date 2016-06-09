@@ -33,7 +33,8 @@ plugin_LTLIBRARIES = \
 	const_1909.la pointer_cast_1910.la fast_lookahead_limiter_1913.la \
 	latency_1914.la xfade_1915.la sc4m_1916.la \
 	mbeq_1197.la pitch_scale_1193.la pitch_scale_1194.la imp_1199.la \
-	sidechainer_12044.la low_cut_75_12043.la colourSigmoid_12041.la 
+	sidechainer_12044.la low_cut_75_12043.la colourSigmoid_12041.la \
+	rms_filter_12045.la 
 
 SUBDIRS = po util gsm gverb metadata
 
@@ -74,6 +75,7 @@ sc3_1427_la_LIBADD = -Lutil -ldb -lrms
 sc4_1882_la_LIBADD = -Lutil -ldb -lrms
 sc4m_1916_la_LIBADD = -Lutil -ldb -lrms
 se4_1883_la_LIBADD = -Lutil -ldb -lrms
+rms_filter_12044_la_LIBADD = -Lutil -lfilters
 gsm_1215_la_LIBADD = gsm/libgsm.a
 gverb_1216_la_LIBADD = -Lgverb -lgverb
 lcr_delay_1436_la_DEPENDENCIES = util/biquad.h

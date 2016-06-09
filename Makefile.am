@@ -33,7 +33,7 @@ plugin_LTLIBRARIES = \
 	const_1909.la pointer_cast_1910.la fast_lookahead_limiter_1913.la \
 	latency_1914.la xfade_1915.la sc4m_1916.la \
 	mbeq_1197.la pitch_scale_1193.la pitch_scale_1194.la imp_1199.la \
-	sidechainer_12044.la low_cut_75_12043.la
+	sidechainer_12044.la low_cut_75_12043.la colourSigmoid_12041.la 
 
 SUBDIRS = po util gsm gverb metadata
 

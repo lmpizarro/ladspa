@@ -3,7 +3,6 @@
 
 #include "filters.h"
 
-#define PI 3.14159265358979323846f
 
 low_pass_filter *low_pass_filter_new(const float fc, const float sr)
 {

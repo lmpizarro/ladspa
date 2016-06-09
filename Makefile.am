@@ -32,7 +32,8 @@ plugin_LTLIBRARIES = \
 	revdelay_1605.la ls_filter_1908.la \
 	const_1909.la pointer_cast_1910.la fast_lookahead_limiter_1913.la \
 	latency_1914.la xfade_1915.la sc4m_1916.la \
-	mbeq_1197.la pitch_scale_1193.la pitch_scale_1194.la imp_1199.la
+	mbeq_1197.la pitch_scale_1193.la pitch_scale_1194.la imp_1199.la \
+	sidechainer_12044.la low_cut_75_12043.la
 
 SUBDIRS = po util gsm gverb metadata
 
@@ -89,6 +90,8 @@ notch_iir_1894_la_LIBADD = -Lutil -liir
 notch_iir_1894_la_SOURCES = notch_iir_1894.c
 butterworth_1902_la_LIBADD = -Lutil -liir
 butterworth_1902_la_SOURCES = butterworth_1902.c
+low_cut_75_12043_la_LIBADD = -Lutil -liir
+low_cut_75_12043_la_SOURCES = low_cut_75_12043.c 
 
 # Rule to build .c files from XML source
 %.c:	%.xml

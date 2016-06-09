@@ -37,7 +37,6 @@
       float inpSq, outSq;
       float ampInp;
 
-
       inpRMS = 0.0f;
       outRMS = 0.0f;
       for (pos = 0; pos < sample_count; pos++) {

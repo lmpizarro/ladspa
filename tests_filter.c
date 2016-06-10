@@ -104,13 +104,27 @@ int test_dyn_filters(){
    data = (float *) calloc(N, sizeof(float));
  
 
-   for (i = 0; i < N/2; i++){
-       data[i] = pow((sin(2*M_PI*1000*i/sr)), 2);
+   for (i = 0; i < N; i++){
+       data[i] = 0.0f;
    } 
 
-   for (i = N/2; i < N; i++){
-       data[i] = pow((sin(2*M_PI*1000*i/sr)), 2);
+   for (i = N/5; i < 2*N/5; i++){
+       data[i] = 0.7f;
    } 
+
+   for (i = 2*N/5; i < 3*N/5; i++){
+       data[i] = 0.2f;
+   } 
+
+   for (i = 3*N/5; i < 4*N/5; i++){
+       data[i] = 0.5f;
+   } 
+
+   for (i = 4*N/5; i < 5*N/5; i++){
+       data[i] = 0.2f;
+   } 
+
+
 
    for (i = 0; i < N; i++){
       //printf("data %f\n", data[i]);
@@ -118,7 +132,7 @@ int test_dyn_filters(){
 
    dynamics_filter *df;
 
-   df = dynamics_filter_new(0.5f, 5.0f, sr);
+   df = dynamics_filter_new(0.05f, 0.5f, sr);
 
    
    printf(" %f\n", df->fcAttack);
@@ -129,8 +143,9 @@ int test_dyn_filters(){
 
 
    for (i = 0; i < N; i++){
-       dynamics_filter_process(df, data[i], 0.002f);
-       printf ("%f, %f\n",df->releaseState, df->attackState);
+       float out = dynamics_filter_gain1(df, 0.7);
+       dynamics_filter_process(df, data[i], 0.3f);
+       printf ("%f %f %f\n",df->releaseState, df->attackState, out);
    }
 
    dynamics_filter_free(df);

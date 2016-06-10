@@ -15,9 +15,12 @@ low_pass_filter *low_pass_filter_new(const float fc, const float sr)
   new->fc = fc;
   new->sr = sr;
 
-  new->a = tan(PI*fc*sr);
+  new->a = tan(PI * new->fc / new->sr);
   new->coef1 = new->a/(1+new->a);
   new->coef2 = (new->a - 1)/(1 + new->a);
+
+  new->minp = 0.0f;
+  new->mout = 0.0f;
 
   return new;
 

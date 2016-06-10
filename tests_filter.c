@@ -52,13 +52,48 @@ int test_rms ()
    return(0);
 }
 
+int test_lp_filter (){
+   int N, i;
+   float sr, fc, out;
+   float * data;
+   low_pass_filter * lpf;
+
+   N = 44100;
+   sr = 44100.0f;
+
+
+   data = (float *) calloc(N, sizeof(float));
+   
+   for (i = 0; i < N/10; i++){
+      data[i] = 0.0f;
+   } 
+
+   for (i = N/10; i < N; i++){
+      data[i] = 1.0f;
+   } 
+
+   fc = 1.0f; 
+   lpf = low_pass_filter_new(fc, sr);
+
+   //printf("%f %f %f\n", lpf->coef1, lpf->coef2, lpf->a);
+
+   for (i =0; i < N; i ++) {
+    printf ("%f %f %f ", lpf->minp, data[i], lpf->mout);
+    out = low_pass_filter_process (lpf, data[i]);
+    printf ("%f\n",  out);
+   }
+
+   low_pass_filter_free(lpf);
+   free(data);
+}
+
 int test_dyn_filters(){
 
    float Ts, dur;
    int  N, i, sr;
    float * data;
 
-   dur = .1f;
+   dur = 1.0f;
    sr = 44100;
    Ts = 1.0f / sr;
 
@@ -70,11 +105,11 @@ int test_dyn_filters(){
  
 
    for (i = 0; i < N/2; i++){
-       data[i] = 0.0f;
+       data[i] = pow((sin(2*M_PI*1000*i/sr)), 2);
    } 
 
    for (i = N/2; i < N; i++){
-       data[i] = 0.5f;
+       data[i] = pow((sin(2*M_PI*1000*i/sr)), 2);
    } 
 
    for (i = 0; i < N; i++){
@@ -83,7 +118,7 @@ int test_dyn_filters(){
 
    dynamics_filter *df;
 
-   df = dynamics_filter_new(0.005f, 0.05f, sr);
+   df = dynamics_filter_new(0.5f, 5.0f, sr);
 
    
    printf(" %f\n", df->fcAttack);
@@ -95,7 +130,7 @@ int test_dyn_filters(){
 
    for (i = 0; i < N; i++){
        dynamics_filter_process(df, data[i], 0.002f);
-       printf ("releaseState %f, attackState %f\n",df->releaseState, df->attackState);
+       printf ("%f, %f\n",df->releaseState, df->attackState);
    }
 
    dynamics_filter_free(df);
@@ -108,5 +143,6 @@ int main (){
    //test_rms();
 
    test_dyn_filters();
+   //test_lp_filter();
    return (0);
 }

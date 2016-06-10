@@ -3,6 +3,9 @@
 
 #include "filters.h"
 
+/*
+* LP Filter
+*/
 
 low_pass_filter *low_pass_filter_new(const float fc, const float sr)
 {
@@ -33,6 +36,10 @@ void low_pass_filter_free(low_pass_filter *lpf){
   free(lpf);
 }
 
+
+/*
+*   RMS filter
+*/
 rms_filter *rms_filter_new(const float fc, const float sr){
 
    rms_filter *new = (rms_filter *)calloc(1, sizeof(rms_filter));
@@ -57,34 +64,44 @@ void rms_filter_free(rms_filter *rms){
   free(rms);
 }
 
-dynamics_filter *dynamics_filter_new(const float fc, const float attack_time, 
-                                     const float release_time, const float sr){
+/*
+* DYN Filter
+*/
+dynamics_filter *dynamics_filter_new(const float attack_time, 
+                                     const float release_time, 
+                                     const float sr){
 
-   float fcAttack, fcRelease;
-
-   fcAttack = 1.0f/(2 * PI * attack_time);  
-   fcRelease = 1.0f/(2 * PI * release_time);  
- 
+   //printf ("a %f, r % f\n", attack_time, release_time);
+    
    dynamics_filter *new = (dynamics_filter *)calloc(1, sizeof(dynamics_filter));
-   new->attackFilter = low_pass_filter_new(fcAttack, sr);
-   new->releaseFilter = low_pass_filter_new(fcRelease, sr);
+
+   new->fcAttack = 1.0f/(2.0f * PI * attack_time);  
+   new->fcRelease = 1.0f/(2.0f * PI * release_time);  
+   //printf ("a %f, r % f\n", new->fcAttack, new->fcRelease);
+   new->sr = sr;
+   new->attackState = 0.0f;
+   new->releaseState = 0.0f;
+
+   new->attackFilter = low_pass_filter_new(new->fcAttack, new->sr);
+   new->releaseFilter = low_pass_filter_new(new->fcRelease, new->sr);
+
    return new;
 }
 
 void dynamics_filter_process (dynamics_filter *dyn, const float inpRMS, 
                                const float threshold){
-             if (inpRMS > threshold){
+    if (inpRMS >= threshold){
           dyn->attackState = low_pass_filter_process(dyn->attackFilter, 1.0f); 
           dyn->releaseState = low_pass_filter_process(dyn->releaseFilter, 0.0f); 
-        }else{
+    }else{
           dyn->attackState = low_pass_filter_process(dyn->attackFilter, 0.0f); 
           dyn->releaseState = low_pass_filter_process(dyn->releaseFilter, 1.0f); 
-        }
+    }
 }
 
 void dynamics_filter_free(dynamics_filter *dyn){
   low_pass_filter_free(dyn->attackFilter);
-  low_pass_filter_free(dyn->attackFilter);
+  low_pass_filter_free(dyn->releaseFilter);
   free(dyn);
 }
 

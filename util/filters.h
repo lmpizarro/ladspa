@@ -3,6 +3,9 @@
 
 #include <math.h>
 
+#define PI 3.14159265358979323846f
+
+
 typedef struct {
    float fc;
    float a;
@@ -40,10 +43,13 @@ typedef struct {
    low_pass_filter * releaseFilter;
 }dynamics_filter;
 
-dynamics_filter *dynamics_filter_new(const float fc, const float attack_time, const float release_time);
-float dynamics_filter_process (dynamics_filter *dyn, const float inpRMS, const float threshold);
+dynamics_filter *dynamics_filter_new(const float attack_time, 
+                                     const float release_time, const float sr);
+void dynamics_filter_process (dynamics_filter *dyn, const float inpRMS, const float threshold);
 void dynamics_filter_free(dynamics_filter *dyn);
 
+void dynamics_filter_set_attack_time (dynamics_filter *dyn, const float attack_time);
+void dynamics_filter_set_release_time (dynamics_filter *dyn, const float release_time);
 
-
+float dynamics_filter_gain1 (dynamics_filter *dyn, const float gain_limit);
 #endif

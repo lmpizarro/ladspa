@@ -1,0 +1,96 @@
+<?xml version="1.0"?>
+<!DOCTYPE ladspa SYSTEM "ladspa-swh.dtd">
+<?xml-stylesheet href="ladspa.css" type="text/css"?>
+
+<ladspa>
+  <global>
+    <meta name="maker" value="Luis Maria Pizarro &lt;lmpizarro@gmail.com&gt;"/>
+    <meta name="copyright" value="GPL"/>
+    <meta name="properties" value="HARD_RT_CAPABLE"/>
+    <code><![CDATA[
+      #include "util/filters.h"
+    ]]></code>
+  </global>
+
+  <plugin label="rms_filter" id="12045" class="UtilityPlugin">
+    <name>rms_filter</name>
+    <p>A plugin that implements an example on how to use rms_filter</p>
+
+    <callback event="instantiate"><![CDATA[
+      rmsFilterINP = rms_filter_new (5.0f, s_rate);
+      rmsFilterOUT = rms_filter_new (5.0f, s_rate);
+      inpRMS = 0.0f;
+      outRMS = 0.0f;
+    ]]></callback>
+
+    <callback event="activate"><![CDATA[
+    ]]></callback>
+
+    <callback event="cleanup"><![CDATA[
+      rms_filter_free(plugin_data->rmsFilterINP);
+      rms_filter_free(plugin_data->rmsFilterOUT);
+
+    ]]></callback>
+
+    <callback event="run"><![CDATA[
+      unsigned long pos;
+      float inpSq, outSq;
+      float ampInp;
+
+      inpRMS = 0.0f;
+      outRMS = 0.0f;
+      for (pos = 0; pos < sample_count; pos++) {
+        ampInp = pow(10,inputGain/20) * input[pos];
+	inpSq =  ampInp * ampInp;
+
+        inpRMS = rms_filter_process(rmsFilterINP, inpSq);
+
+        buffer_write(output[pos], ampInp);
+
+        outSq =  output[pos] * output[pos];
+        outRMS = rms_filter_process(rmsFilterOUT, outSq);
+      }
+
+      plugin_data->inpRMS = inpRMS;
+      *(plugin_data->guiRMSInput) = 20*log10(inpRMS) +10;
+
+      plugin_data->outRMS = outRMS;
+      *(plugin_data->guiRMSOutput) = 20*log10(outRMS) +10;
+
+    ]]></callback>
+
+    <port label="guiRMSInput" dir="output" type="control">
+      <name>RMS INP (dB)</name>
+      <p>The level of the input signal, in decibels.</p>
+      <range min="-60" max="+20"/>
+    </port>
+
+    <port label="guiRMSOutput" dir="output" type="control">
+      <name>RMS OUT (dB)</name>
+      <p>The level of the output signal, in decibels.</p>
+      <range min="-60" max="+20"/>
+    </port>
+
+    <port label="inputGain" dir="input" type="control" hint="default_0">
+      <name>Gain Inp (dB)</name>
+      <p>Input Gain</p>
+      <range min="-30" max="30"/>
+    </port>
+
+    <port label="input" dir="input" type="audio">
+      <name>Input</name>
+    </port>
+
+    <port label="output" dir="output" type="audio">
+      <name>Output</name>
+    </port>
+
+    <instance-data label="inpRMS" type="LADSPA_Data" />
+    <instance-data label="outRMS" type="LADSPA_Data" />
+
+    <instance-data label="rmsFilterINP" type="rms_filter *" />
+    <instance-data label="rmsFilterOUT" type="rms_filter *" />
+
+
+  </plugin>
+</ladspa>

@@ -57,5 +57,3 @@ void rms_filter_free(rms_filter *rms){
   low_pass_filter_free(rms->filter2);
   free(rms);
 }
-
-

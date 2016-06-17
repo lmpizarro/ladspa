@@ -61,10 +61,17 @@ typedef struct {
    float mout, mmout;
    float a0, a1, a2;
    float b0, b1, b2;
-
+   float V0;
 }S2_FLT;
 
 
 S2_FLT *HPF_C (const float fc, const float fs);
+float HPF_R (S2_FLT *lp, float inp);
+void HPF_D (S2_FLT *f);
+void HPF_Set_Fc(S2_FLT *f, const float fc);
+
+
+S2_FLT *LF_SHELV_C (const float fc, const float fs);
+void LF_SHELV_Set_G (S2_FLT *, const float);
 
 #endif

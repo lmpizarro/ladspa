@@ -124,24 +124,102 @@ float dynamics_filter_gain1 (dynamics_filter *dyn, const float gain) {
    return ((1.0f- gain)*rel + gain)*((gain - 1.0f)*att + 1.0f);
 }
 
+void HPF_Set_Fc(S2_FLT *f, const float fc){
+  float K;
+  float den;
+
+  f->fc = fc;
+
+  K = tan(PI*f->fc*f->fs);
+  den = 1.0f + sqrt(2.0f)*K + K*K;
+  f->a0 = 1.0 / den;
+  f->a1 = -1.0 / den;
+  f->a2 = 1.0 / den;
+
+  f->b0 = 1.0f;
+  f->b1 = 2.0f*(K*K -1.0f) / den;
+  f->b2 = 1.0f + K*K-sqrt(2.0f)*K / den;
+
+
+}
 
 S2_FLT *HPF_C (const float fc, const float fs){
-  float K = tan(PI*fc*fs);
-  float den = 1.0f + sqrt(2.0f)*K + K*K;
 
   S2_FLT *new_hpf = (S2_FLT *) calloc(1, sizeof(S2_FLT));
 
-  new_hpf->a0 = 1.0 / den;
-  new_hpf->a1 = -1.0 / den;
-  new_hpf->a2 = 1.0 / den;
+  new_hpf->fs = fs;
+  
+  HPF_Set_Fc(new_hpf, fc);
 
-  new_hpf->b0 = 1.0f;
-  new_hpf->b1 = 2.0f*(K*K -1.0f) / den;
-  new_hpf->b2 = 1.0f + K*K-sqrt(2.0f)*K / den;
-
-
+  new_hpf->minp = 0.0f; 
+  new_hpf->mminp = 0.0f;
+  new_hpf->mout = 0.0f; 
+  new_hpf->mmout = 0.0f;
 
   return(new_hpf);
 }
 
 
+float HPF_R (S2_FLT *f, float inp){
+  float out;
+ 
+  out = f->a0 * inp + f->a1 * f->minp + f->a2 * f->mminp - 
+	  f->b1 * f->mout - f->b2 * f->mmout;
+  f->mminp = f->minp;
+  f->minp = inp;
+  f->mmout = f->mout;
+  f->mout = out;
+
+  return out;
+}
+
+
+void HPF_D (S2_FLT *f){
+  free(f);
+}
+
+void LF_SHELV_Set_G(S2_FLT *f, const float G){
+  float K;
+  float den;
+
+  K = tan(PI*f->fc*f->fs);
+  f->V0 = pow(10.0f, G/20.0f);
+  if (f->V0 >= 1.0f){
+    den = 1.0f + sqrt(2) * K + K * K;
+    f->a0 = (1.0f + sqrt(2*f->V0) * K + f->V0 * K * K) /den ;
+    f->a1 = 2.0f * (f->V0*K*K - 1.0f) /den;
+    f->a2 =  (1.0f - sqrt(2*f->V0) * K + f->V0 * K * K) /den ;
+    f->b0 = 1.0f;
+    f->b1 = 2.0f * (K*K - 1.0f);
+    f->b2 =  (1.0f - sqrt(2) * K + K * K) /den ;
+  } else {
+    den = 1.0f + sqrt(2*f->V0) * K + K * K;
+    f->a0 = (1.0f + sqrt(2) * K + f->V0 * K * K) /den ;
+    f->a1 = 2.0f * (K*K - 1.0f) /den;
+    f->a2 =  (1.0f - sqrt(2) * K + K * K) /den ;
+    f->b0 = 1.0f;
+    f->b1 = 2.0f * (f->V0*K*K - 1.0f);
+    f->b2 =  (1.0f - sqrt(2*f->V0) * K + f->V0*K * K) /den ;
+  }
+}
+
+S2_FLT *LF_SHELV_C (const float fc, const float fs){
+  float K;
+  float den;
+
+  S2_FLT *f = (S2_FLT *) calloc(1, sizeof(S2_FLT));
+  f->fs = fs;
+  f->fc = fc;
+  f->V0 = 1.0f;
+
+  K = tan(PI*f->fc*f->fs);
+  den = 1.0f + sqrt(2.0f)*K + K*K;
+  f->a0 = 1.0;
+  f->a1 = 2 * (K*K -1.0f) / den;
+  f->a2 = 1.0f - sqrt(2.0f)*K + K*K / den;
+
+  f->b0 = 1.0f;
+  f->b1 = 2.0f*(K*K -1.0f) / den;
+  f->b2 = 1.0f + K*K-sqrt(2.0f)*K / den;
+  return f;
+}

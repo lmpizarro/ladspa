@@ -52,4 +52,19 @@ void dynamics_filter_set_attack_time (dynamics_filter *dyn, const float attack_t
 void dynamics_filter_set_release_time (dynamics_filter *dyn, const float release_time);
 
 float dynamics_filter_gain1 (dynamics_filter *dyn, const float gain_limit);
+
+
+typedef struct {
+   float fc;
+   float fs;
+   float minp, mminp;
+   float mout, mmout;
+   float a0, a1, a2;
+   float b0, b1, b2;
+
+}S2_FLT;
+
+
+S2_FLT *HPF_C (const float fc, const float fs);
+
 #endif

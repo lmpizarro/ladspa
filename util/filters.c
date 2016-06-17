@@ -123,3 +123,25 @@ float dynamics_filter_gain1 (dynamics_filter *dyn, const float gain) {
    rel = dyn->releaseState;  
    return ((1.0f- gain)*rel + gain)*((gain - 1.0f)*att + 1.0f);
 }
+
+
+S2_FLT *HPF_C (const float fc, const float fs){
+  float K = tan(PI*fc*fs);
+  float den = 1.0f + sqrt(2.0f)*K + K*K;
+
+  S2_FLT *new_hpf = (S2_FLT *) calloc(1, sizeof(S2_FLT));
+
+  new_hpf->a0 = 1.0 / den;
+  new_hpf->a1 = -1.0 / den;
+  new_hpf->a2 = 1.0 / den;
+
+  new_hpf->b0 = 1.0f;
+  new_hpf->b1 = 2.0f*(K*K -1.0f) / den;
+  new_hpf->b2 = 1.0f + K*K-sqrt(2.0f)*K / den;
+
+
+
+  return(new_hpf);
+}
+
+

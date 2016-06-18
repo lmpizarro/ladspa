@@ -74,4 +74,5 @@ void HPF_Set_Fc(S2_FLT *f, const float fc);
 S2_FLT *LF_SHELV_C (const float fc, const float fs);
 void LF_SHELV_Set_G (S2_FLT *, const float);
 
+S2_FLT *HF_SHELV_C (const float fc, const float fs);
 #endif

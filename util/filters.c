@@ -184,7 +184,7 @@ void LF_SHELV_Set_G(S2_FLT *f, const float G){
 
   K = tan(PI*f->fc*f->fs);
   f->V0 = pow(10.0f, G/20.0f);
-  if (f->V0 >= 1.0f){
+  if (f->V0 > 1.0f){
     den = 1.0f + sqrt(2) * K + K * K;
     f->a0 = (1.0f + sqrt(2*f->V0) * K + f->V0 * K * K) /den ;
     f->a1 = 2.0f * (f->V0*K*K - 1.0f) /den;
@@ -192,7 +192,7 @@ void LF_SHELV_Set_G(S2_FLT *f, const float G){
     f->b0 = 1.0f;
     f->b1 = 2.0f * (K*K - 1.0f);
     f->b2 =  (1.0f - sqrt(2) * K + K * K) /den ;
-  } else {
+  } else if (f->V0 < 1.0f) {
     den = 1.0f + sqrt(2*f->V0) * K + K * K;
     f->a0 = (1.0f + sqrt(2) * K + f->V0 * K * K) /den ;
     f->a1 = 2.0f * (K*K - 1.0f) /den;
@@ -200,6 +200,14 @@ void LF_SHELV_Set_G(S2_FLT *f, const float G){
     f->b0 = 1.0f;
     f->b1 = 2.0f * (f->V0*K*K - 1.0f);
     f->b2 =  (1.0f - sqrt(2*f->V0) * K + f->V0*K * K) /den ;
+  }  else {
+    f->a0 = 1.0f;
+    f->a1 = 0.0f;
+    f->a2 = 0.0f ;
+    f->b0 = 0.0f ;
+    f->b1 = 0.0f ;
+    f->b2 = 0.0f;
+ 
   }
 }
 
@@ -223,3 +231,10 @@ S2_FLT *LF_SHELV_C (const float fc, const float fs){
   f->b2 = 1.0f + K*K-sqrt(2.0f)*K / den;
   return f;
 }
+
+S2_FLT *HF_SHELV_C (const float fc, const float fs){
+
+ return LF_SHELV_C (fc,  fs);
+}
+
+

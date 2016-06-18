@@ -67,21 +67,50 @@ typedef struct {
 float S2_FLT_R (S2_FLT *f, float inp);
 void S2_FLT_D (S2_FLT *f);
 
+/*
+ * High Pass Filter
+ */
 S2_FLT *HPF_C (const float fc, const float fs);
 void HPF_Set_Fc(S2_FLT *f, const float fc);
 float HPF_R (S2_FLT *lp, float inp);
 void HPF_D (S2_FLT *f);
 
+/*
+ * Low Pass Filter
+ */
+S2_FLT *LPF_C (const float fc, const float fs);
+void LPF_Set_Fc(S2_FLT *f, const float fc);
+float LPF_R (S2_FLT *lp, float inp);
+void LPF_D (S2_FLT *f);
+
+/*
+ * Band Pass Filter
+ */
+S2_FLT *BPF_C (const float fc, const float q, const float fs);
+void BPF_Set_Fc(S2_FLT *f, const float fc);
+void BPF_Set_Q(S2_FLT *f, const float fc);
+float BPF_R (S2_FLT *lp, float inp);
+void BPF_D (S2_FLT *f);
+
+/*
+ * Low Shelving Filter
+ */
 S2_FLT *LF_SHELV_C (const float fc, const float fs);
 void LF_SHELV_Set_G (S2_FLT *, const float);
 float LF_SHELV_R (S2_FLT *, const float);
 void LF_SHELV_D (S2_FLT *);
 
+/*
+ * High Shelving Filter
+ */
 S2_FLT *HF_SHELV_C (const float fc, const float fs);
 void HF_SHELV_Set_G (S2_FLT *, const float);
 float HF_SHELV_R (S2_FLT *, const float);
 void HF_SHELV_D (S2_FLT *);
 
+/*
+ * Peak Filter
+ */
 S2_FLT *PEAK_C (const float fc, const float fs);
 void PEAK_Set_G (S2_FLT *, const float);
 float PEAK_R (S2_FLT *, const float);
@@ -93,6 +122,9 @@ void PEAK_D (S2_FLT *);
 #define MPK_FC 640
 #define HPK_FC 3000
 #define HSH_FC 8000
+#define BP_MIN 50
+#define BP_MAX 15000
+#define BP_FC  640
 
 typedef struct{
   S2_FLT *LSH; //low shelving
@@ -107,5 +139,16 @@ CH_STRP_550 * CH_STRP_550_C(const float fs);
 float CH_STRP_550_R(CH_STRP_550 * ch, const float inp);
 void CH_STRP_550_D(CH_STRP_550 * ch);
 
+/*
+ *  http://sound.westhost.com/project84.htm
+ *  Eight Band Sub-Woofer Graphic Equaliser
+ *  25, 32, 40, 50, 63, 80, 100, 125
+ *  http://rane.com/pdf/constanq.pdf
+ */
+
+/*
+ * http://mail.manley.com/msmpx.php
+ * Manley Massive Passive Stereo Tube EQ
+ */
 
 #endif

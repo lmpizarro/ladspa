@@ -194,6 +194,41 @@ void HPF_D (S2_FLT *f){
  *    END High Pass Filter
  */
 
+/*
+ * Low Pass Filter
+ */
+S2_FLT *LPF_C (const float fc, const float fs){
+  S2_FLT *new_hpf = (S2_FLT *) calloc(1, sizeof(S2_FLT));
+
+  new_hpf->fs = fs;
+  
+  LPF_Set_Fc(new_hpf, fc);
+
+  new_hpf->minp = 0.0f; 
+  new_hpf->mminp = 0.0f;
+  new_hpf->mout = 0.0f; 
+  new_hpf->mmout = 0.0f;
+
+  return(new_hpf);
+}
+
+void LPF_Set_Fc(S2_FLT *f, const float fc){}
+float LPF_R (S2_FLT *f, float inp){
+    return  S2_FLT_R (f, inp);
+}
+void LPF_D (S2_FLT *f){
+   S2_FLT_D(f);
+}
+
+/*
+ * Band Pass Filter
+ */
+S2_FLT *BPF_C (const float fc, const float q, const float fs){}
+void BPF_Set_Fc(S2_FLT *f, const float fc){}
+void BPF_Set_Q(S2_FLT *f, const float fc){}
+float BPF_R (S2_FLT *lp, float inp){}
+void BPF_D (S2_FLT *f){}
+
 
 /*
  *  SHELVING

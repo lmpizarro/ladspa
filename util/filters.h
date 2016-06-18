@@ -64,18 +64,27 @@ typedef struct {
    float V0;
 }S2_FLT;
 
+float S2_FLT_R (S2_FLT *f, float inp);
+void S2_FLT_D (S2_FLT *f);
 
 S2_FLT *HPF_C (const float fc, const float fs);
+void HPF_Set_Fc(S2_FLT *f, const float fc);
 float HPF_R (S2_FLT *lp, float inp);
 void HPF_D (S2_FLT *f);
-void HPF_Set_Fc(S2_FLT *f, const float fc);
-
 
 S2_FLT *LF_SHELV_C (const float fc, const float fs);
 void LF_SHELV_Set_G (S2_FLT *, const float);
+void LF_SHELV_R (S2_FLT *, const float);
+void LF_SHELV_D (S2_FLT *);
 
 S2_FLT *HF_SHELV_C (const float fc, const float fs);
-
 void HF_SHELV_Set_G (S2_FLT *, const float);
+void HF_SHELV_R (S2_FLT *, const float);
+void HF_SHELV_D (S2_FLT *);
+
+S2_FLT *PEAK_SHELV_C (const float fc, const float fs);
+void PEAK_Set_G (S2_FLT *, const float);
+void PEAK_R (S2_FLT *, const float);
+void PEAK_D (S2_FLT *);
 
 #endif

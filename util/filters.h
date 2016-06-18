@@ -74,17 +74,38 @@ void HPF_D (S2_FLT *f);
 
 S2_FLT *LF_SHELV_C (const float fc, const float fs);
 void LF_SHELV_Set_G (S2_FLT *, const float);
-void LF_SHELV_R (S2_FLT *, const float);
+float LF_SHELV_R (S2_FLT *, const float);
 void LF_SHELV_D (S2_FLT *);
 
 S2_FLT *HF_SHELV_C (const float fc, const float fs);
 void HF_SHELV_Set_G (S2_FLT *, const float);
-void HF_SHELV_R (S2_FLT *, const float);
+float HF_SHELV_R (S2_FLT *, const float);
 void HF_SHELV_D (S2_FLT *);
 
-S2_FLT *PEAK_SHELV_C (const float fc, const float fs);
+S2_FLT *PEAK_C (const float fc, const float fs);
 void PEAK_Set_G (S2_FLT *, const float);
-void PEAK_R (S2_FLT *, const float);
+float PEAK_R (S2_FLT *, const float);
 void PEAK_D (S2_FLT *);
+
+#define LSH_FC 80
+#define HPS_FC 80
+#define LPK_FC 200
+#define MPK_FC 640
+#define HPK_FC 3000
+#define HSH_FC 8000
+
+typedef struct{
+  S2_FLT *LSH; //low shelving
+  S2_FLT *HPS; //high pass
+  S2_FLT *LPK; //low peak
+  S2_FLT *MPK; //mid peak
+  S2_FLT *HPK; //high peak
+  S2_FLT *HSH; //high shelving
+}CH_STRP_550;
+
+CH_STRP_550 * CH_STRP_550_C(const float fs);
+float CH_STRP_550_R(CH_STRP_550 * ch, const float inp);
+void CH_STRP_550_D(CH_STRP_550 * ch);
+
 
 #endif

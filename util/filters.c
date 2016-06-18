@@ -145,6 +145,10 @@ void S2_FLT_D (S2_FLT *f){
   free(f);
 }
 
+
+/*
+ *    High Pass Filter
+ */
 S2_FLT *HPF_C (const float fc, const float fs){
 
   S2_FLT *new_hpf = (S2_FLT *) calloc(1, sizeof(S2_FLT));
@@ -179,17 +183,24 @@ void HPF_Set_Fc(S2_FLT *f, const float fc){
 
 }
 
-
 float HPF_R (S2_FLT *f, float inp){
     return  S2_FLT_R (f, inp);
 }
 
 void HPF_D (S2_FLT *f){
-  free(f);
+   S2_FLT_D(f);
 }
+/*
+ *    END High Pass Filter
+ */
+
 
 /*
  *  SHELVING
+ */
+
+/*
+ * Low Freq Shelving
  */
 S2_FLT *LF_SHELV_C (const float fc, const float fs){
   //float K;
@@ -246,9 +257,21 @@ void LF_SHELV_Set_G(S2_FLT *f, const float G){
 }
 
 
+float LF_SHELV_R (S2_FLT *f, const float inp){
+    return  S2_FLT_R (f, inp);
+}
+void LF_SHELV_D (S2_FLT *f){
+   S2_FLT_D(f);
+}
+
+/*
+ * END Low Freq Shelving
+ */
 
 
-
+/*
+ * HIGH Freq Shelving
+ */
 S2_FLT *HF_SHELV_C (const float fc, const float fs){
  return LF_SHELV_C (fc,  fs);
 }
@@ -288,4 +311,66 @@ void HF_SHELV_Set_G(S2_FLT *f, const float G){
   }
 }
 
+float HF_SHELV_R (S2_FLT *f, const float inp){
+    return  S2_FLT_R (f, inp);
+}
+void HF_SHELV_D (S2_FLT *f){
+  S2_FLT_D(f);
+}
 
+/*
+ * END HIGH Freq Shelving
+ */
+
+/*
+ *  PEAK
+ */
+S2_FLT *PEAK_C (const float fc, const float fs){
+  S2_FLT *f = (S2_FLT *) calloc(1, sizeof(S2_FLT));
+  f->fs = fs;
+  f->fc = fc;
+
+  return f;
+}
+void PEAK_Set_G (S2_FLT *f, const float g){}
+float PEAK_R (S2_FLT *f, const float inp){
+  return S2_FLT_R(f, inp);
+}
+void PEAK_D (S2_FLT *f){
+  S2_FLT_D(f);
+}
+
+/*
+ *  END PEAK
+ */
+
+/*
+ * CH_STRP_550_D 
+ */
+CH_STRP_550 * CH_STRP_550_C(const float fs){
+  CH_STRP_550 *f = (CH_STRP_550 *) calloc(1, sizeof(CH_STRP_550));
+
+  f->LSH = LF_SHELV_C (LSH_FC, fs);
+  f->HPS = HPF_C(HPS_FC, fs);
+  f->MPK = PEAK_C (MPK_FC, fs);
+  f->HPK = PEAK_C (HPK_FC, fs);
+  f->LPK = PEAK_C (LPK_FC, fs);
+  f->HSH = HF_SHELV_C(HSH_FC, fs) ;
+
+  return f;
+}
+float CH_STRP_550_R(CH_STRP_550 * ch, const float inp){
+   float out;
+   
+   out = PEAK_R(ch->LPK, LF_SHELV_R(ch->LSH, HPF_R(ch->HPS, inp)));
+   out = HF_SHELV_R(ch->HSH, PEAK_R(ch->HPK,PEAK_R(ch->MPK, out)));
+
+
+   return out;
+}
+void CH_STRP_550_D(CH_STRP_550 * ch){}
+
+
+/*
+ * END CH_STRP_550_D 
+ */

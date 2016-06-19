@@ -127,6 +127,7 @@ void PEAK_D (S2_FLT *);
 #define BP_MIN 50
 #define BP_MAX 15000
 #define BP_FC  806
+#define N_PKF   7
 /*
  * http://apiaudio.com/product_specs.php?id=106
  * 550A Discrete 3 Band EQ
@@ -140,9 +141,12 @@ typedef struct{
   S2_FLT *HSH; //high shelving
   S2_FLT *BPF; //band pass
   float lpkG, mpkG, hpkG;
-  float lpkf, mpkf, hpkf;
   int bpfON, lshON, hshON;
+  int lpkf, mpkf, hpkf;
   float out;
+  float *lpkFs;
+  float *mpkFs;
+  float *hpkFs;
 }EQLM550;
 
 EQLM550 * EQLM550_C(const float fs);

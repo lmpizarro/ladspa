@@ -1,7 +1,7 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "../ladspa/util/filters.h"
+#include "util/filters.h"
 
 //  gcc -o main tests.c  -lm -L../ladspa/util -lfilters
 
@@ -11,7 +11,7 @@ int test_rms ()
 
    float sr;
    int dur, N, i;
-   low_pass_filter * lpf;
+   LPF_6db * lpf;
    rms_filter *rms;
 
    float a1, fc1, tx1, ty1, out1, x1, y1;
@@ -28,7 +28,7 @@ int test_rms ()
    a1 = tan(PI*fc1*sr);
 
 
-   lpf = low_pass_filter_new(fc1, sr);
+   lpf = LPF_6db_C(fc1, sr);
    rms = rms_filter_new(fc1, sr);
    printf ("parameter %f %f %d\n", a1, sr, N);
 
@@ -38,7 +38,7 @@ int test_rms ()
    for (i =0; i < N; i ++) {
 
     tx1 =  pow((sin(2*M_PI*1000*i/sr)),2);
-    out2 = low_pass_filter_process (lpf, tx1);
+    out2 = LPF_6db_R (lpf, tx1);
     out3 = rms_filter_process(rms, tx1);
     out1 = (a1/(1+a1))*(tx1 + x1) - ((a1-1)/(1+a1))*y1;
     printf ("x1 %f, tx1 %f, out1 %f, out2 %f, out3 %f\n",x1, tx1, out1, out2, out3);
@@ -46,7 +46,7 @@ int test_rms ()
     x1 = tx1;
    }
 
-   low_pass_filter_free(lpf);
+   LPF_6db_D(lpf);
    rms_filter_free(rms);
    
    return(0);
@@ -56,7 +56,7 @@ int test_lp_filter (){
    int N, i;
    float sr, fc, out;
    float * data;
-   low_pass_filter * lpf;
+   LPF_6db * lpf;
 
    N = 44100;
    sr = 44100.0f;
@@ -73,17 +73,17 @@ int test_lp_filter (){
    } 
 
    fc = 1.0f; 
-   lpf = low_pass_filter_new(fc, sr);
+   lpf = LPF_6db_C(fc, sr);
 
    //printf("%f %f %f\n", lpf->coef1, lpf->coef2, lpf->a);
 
    for (i =0; i < N; i ++) {
     printf ("%f %f %f ", lpf->minp, data[i], lpf->mout);
-    out = low_pass_filter_process (lpf, data[i]);
+    out = LPF_6db_R(lpf, data[i]);
     printf ("%f\n",  out);
    }
 
-   low_pass_filter_free(lpf);
+   LPF_6db_D(lpf);
    free(data);
 }
 
@@ -153,11 +153,28 @@ int test_dyn_filters(){
 
 }
 
+int test_eq550 (){
+  EQLM550 *eq5;
+  int i;
+
+  eq5 = EQLM550_C(44100.0f);
+
+
+  fprintf(stdout, "gains %f %f %f\n", eq5->lpkG, eq5->mpkG, eq5->hpkG);
+  fprintf(stdout, "freqs %d %d %d\n", eq5->lpkf, eq5->mpkf, eq5->hpkf);
+  fprintf(stdout, "switchs %d %d %d\n", eq5->bpfON, eq5->lshON, eq5->hshON);
+  for (i=0; i < N_PKF; i++)
+    fprintf(stdout, "%f %f %f\n", eq5->lpkFs[i], eq5->mpkFs[i], eq5->hpkFs[i]);
+
+  EQLM550_D(eq5);
+  return 0;
+}
+
 int main (){
 
    //test_rms();
-
-   test_dyn_filters();
+   //test_dyn_filters();
    //test_lp_filter();
+  test_eq550(); 
    return (0);
 }

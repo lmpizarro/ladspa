@@ -76,7 +76,6 @@ sc4_1882_la_LIBADD = -Lutil -ldb -lrms
 sc4m_1916_la_LIBADD = -Lutil -ldb -lrms
 se4_1883_la_LIBADD = -Lutil -ldb -lrms
 rms_filter_12045_la_LIBADD = -Lutil -lfilters
-eq_lm550_12046_la_LIBADD = -Lutil -ldb
 gsm_1215_la_LIBADD = gsm/libgsm.a
 gverb_1216_la_LIBADD = -Lgverb -lgverb
 lcr_delay_1436_la_DEPENDENCIES = util/biquad.h
@@ -98,6 +97,8 @@ low_cut_75_12043_la_SOURCES = low_cut_75_12043.c
 eqChanStrip_12040_la_LIBADD = -Lutil -liir
 eqChanStrip_12040_la_SOURCES = eqChanStrip_12040.c
 eqChanStrip_12040_la_DEPENDENCIES = util/biquad.h
+eq_lm550_12046_la_LIBADD = -Lutil -ldb -lfilters
+eq_lm550_12046_la_SOURCES = eq_lm550_12046.c
 
 # Rule to build .c files from XML source
 %.c:	%.xml

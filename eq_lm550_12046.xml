@@ -1,7 +1,6 @@
 <?xml version="1.0"?>
 <!DOCTYPE ladspa SYSTEM "ladspa-swh.dtd">
 <?xml-stylesheet href="ladspa.css" type="text/css"?>
-
 <ladspa>
   <global>
     <meta name="maker" value=" Luis Maria Pizarro &lt;lmpizarro@gmail.com&gt;"/>
@@ -10,6 +9,7 @@
     <code>
       #include "ladspa-util.h"
       #include "util/db.h"
+      #include "util/filters.h"
     </code>
   </global>
 
@@ -19,8 +19,17 @@
 
     <callback event="instantiate"><![CDATA[
       fs = s_rate;
+      rmsFilterINP = rms_filter_new(5.0f, fs);
+      rmsFilterOUT = rms_filter_new(5.0f, fs);
     ]]></callback>
 
+    <callback event="activate"> 
+    </callback>
+
+    <callback event="cleanup">
+       rms_filter_free(plugin_data->rmsFilterINP);
+       rms_filter_free(plugin_data->rmsFilterOUT);
+    </callback>
 
     <callback event="run"><![CDATA[
       unsigned long pos;
@@ -36,7 +45,7 @@
       float p1Freqs [7] ={30.0f, 40.0f, 50.0f, 100.0f, 200.0f, 300.0f, 400.0f}; 
       float p2Freqs [7] ={200.0f, 400.0f, 600.0f, 800.0f, 1500.0f, 3000.0f, 5000.0f}; 
       float p3Freqs [7] ={2500.0f, 5000.0f, 7000.0f, 10000.0f, 12500.0f, 15000.0f, 20000.0f}; 
-
+      float out;
 
       p1Fc = p1Freqs[(int)f1Fc];
       p2Fc = p2Freqs[(int)f2Fc];
@@ -49,10 +58,14 @@
 
       for (pos = 0; pos < sample_count; pos++) {
         tmp = input[pos]*(1-dryWet) + dryWet * input[pos] * iGain * oGain * fs;
-        tmp = 1.0f + tmp;
-        buffer_write(output[pos], input[pos] );
-        *(plugin_data->inpAmp) = lin2db(input[pos]);
-        *(plugin_data->outAmp) = lin2db(output[pos]);
+	tmp = 1.0f + tmp;
+
+	out = input[pos] *iGain * oGain;
+	buffer_write(output[pos], out);
+
+	*(plugin_data->guiRMSInp) = 20*log10(rms_filter_process(rmsFilterINP , input[pos]) + 0.001f);
+
+        *(plugin_data->guiRMSOut) = 20*log10(rms_filter_process(rmsFilterOUT , output[pos]) + 0.001f);
       }
       ]]></callback>
 
@@ -62,7 +75,7 @@
       <range min="-12" max="+12"/>
     </port>
 
-    <port label="f1Fc" dir="input" type="control" hint="default_0, integer">
+    <port label="f1Fc" dir="input" type="control" hint="default_middle, integer">
 	<name>f1Fc Khz(0=.03, 1=.04, 2=.05, 3=.1, 4=.2, 5=.3, 6=.4)</name>
 	<range min="0" max="6"/>
     </port>
@@ -131,19 +144,20 @@
       <name>Output</name>
     </port>
 
-    <port label="inpAmp" dir="output" type="control">
-      <name>Amplitude (dB)</name>
+    <port label="guiRMSInp" dir="output" type="control">
+      <name>InRMS (dB)</name>
       <p>The level of the input signal, in decibels.</p>
       <range min="-40" max="+12"/>
     </port>
 
-    <port label="outAmp" dir="output" type="control">
-      <name>Amplitude (dB)</name>
+    <port label="guiRMSOut" dir="output" type="control">
+      <name>OutRMS (dB)</name>
       <p>The level of the input signal, in decibels.</p>
       <range min="-40" max="+12"/>
     </port>
-
 
     <instance-data label="fs" type="float" />
+    <instance-data label="rmsFilterINP" type="rms_filter *"/>
+    <instance-data label="rmsFilterOUT" type="rms_filter *"/>
   </plugin>
 </ladspa>

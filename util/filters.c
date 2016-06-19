@@ -7,10 +7,10 @@
 * LP Filter
 */
 
-low_pass_filter *low_pass_filter_new(const float fc, const float sr)
+LPF_6db *LPF_6db_C(const float fc, const float sr)
 {
 
-  low_pass_filter *new = (low_pass_filter *)calloc(1, sizeof(low_pass_filter));
+  LPF_6db *new = (LPF_6db *)calloc(1, sizeof(LPF_6db));
   
   new->fc = fc;
   new->sr = sr;
@@ -26,7 +26,7 @@ low_pass_filter *low_pass_filter_new(const float fc, const float sr)
 
 }
 
-float low_pass_filter_process (low_pass_filter *lp, float inp){
+float LPF_6db_R (LPF_6db *lp, float inp){
     float out;
 
     out = lp->coef1*(inp + lp->minp) - lp->coef2*lp->mout;
@@ -35,7 +35,7 @@ float low_pass_filter_process (low_pass_filter *lp, float inp){
     return out;
 }
 
-void low_pass_filter_free(low_pass_filter *lpf){
+void LPF_6db_D(LPF_6db *lpf){
   free(lpf);
 }
 
@@ -46,8 +46,8 @@ void low_pass_filter_free(low_pass_filter *lpf){
 rms_filter *rms_filter_new(const float fc, const float sr){
 
    rms_filter *new = (rms_filter *)calloc(1, sizeof(rms_filter));
-   new->filter1 = low_pass_filter_new(fc, sr);
-   new->filter2 = low_pass_filter_new(fc/2.0f, sr);
+   new->filter1 = LPF_6db_C(fc, sr);
+   new->filter2 = LPF_6db_C(fc/2.0f, sr);
    return new;
 }
 
@@ -55,15 +55,15 @@ rms_filter *rms_filter_new(const float fc, const float sr){
 float rms_filter_process (rms_filter *rms, const float inp){
   float out1, out2;
 
-  out1 = low_pass_filter_process(rms->filter1, inp);
-  out2 = low_pass_filter_process(rms->filter2, sqrt(out1));
+  out1 = LPF_6db_R(rms->filter1, inp*inp);
+  out2 = LPF_6db_R(rms->filter2, sqrt(out1));
 
-  return out2*sqrt(2);
+  return out2;
 }
 
 void rms_filter_free(rms_filter *rms){
-  low_pass_filter_free(rms->filter1);
-  low_pass_filter_free(rms->filter2);
+  LPF_6db_D(rms->filter1);
+  LPF_6db_D(rms->filter2);
   free(rms);
 }
 
@@ -85,8 +85,8 @@ dynamics_filter *dynamics_filter_new(const float attack_time,
    new->attackState = 0.0f;
    new->releaseState = 0.0f;
 
-   new->attackFilter = low_pass_filter_new(new->fcAttack, new->sr);
-   new->releaseFilter = low_pass_filter_new(new->fcRelease, new->sr);
+   new->attackFilter = LPF_6db_C(new->fcAttack, new->sr);
+   new->releaseFilter = LPF_6db_C(new->fcRelease, new->sr);
 
    return new;
 }
@@ -94,17 +94,17 @@ dynamics_filter *dynamics_filter_new(const float attack_time,
 void dynamics_filter_process (dynamics_filter *dyn, const float inpRMS, 
                                const float threshold){
     if (inpRMS >= threshold){
-          dyn->attackState = low_pass_filter_process(dyn->attackFilter, 1.0f); 
-          dyn->releaseState = low_pass_filter_process(dyn->releaseFilter, 0.0f); 
+          dyn->attackState = LPF_6db_R(dyn->attackFilter, 1.0f); 
+          dyn->releaseState = LPF_6db_R(dyn->releaseFilter, 0.0f); 
     }else{
-          dyn->attackState = low_pass_filter_process(dyn->attackFilter, 0.0f); 
-          dyn->releaseState = low_pass_filter_process(dyn->releaseFilter, 1.0f); 
+          dyn->attackState = LPF_6db_R(dyn->attackFilter, 0.0f); 
+          dyn->releaseState = LPF_6db_R(dyn->releaseFilter, 1.0f); 
     }
 }
 
 void dynamics_filter_free(dynamics_filter *dyn){
-  low_pass_filter_free(dyn->attackFilter);
-  low_pass_filter_free(dyn->releaseFilter);
+  LPF_6db_D(dyn->attackFilter);
+  LPF_6db_D(dyn->releaseFilter);
   free(dyn);
 }
 

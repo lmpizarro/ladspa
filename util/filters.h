@@ -14,18 +14,17 @@ typedef struct {
    float mout;
    float coef1;
    float coef2;
+}LPF_6db;
 
-}low_pass_filter;
-
-low_pass_filter *low_pass_filter_new(const float fc, const float sr);
-float low_pass_filter_process (low_pass_filter *lp, float inp);
-void low_pass_filter_free(low_pass_filter *lpf);
+LPF_6db *LPF_6db_C(const float fc, const float sr);
+float LPF_6db_R(LPF_6db *lp, float inp);
+void LPF_6db_D(LPF_6db *lpf);
 
 typedef struct {
    float fc;
    float sr;
-   low_pass_filter * filter1;
-   low_pass_filter * filter2;
+   LPF_6db * filter1;
+   LPF_6db * filter2;
 }rms_filter;
 
 
@@ -39,8 +38,8 @@ typedef struct {
    float attackState;
    float releaseState;
    float sr;
-   low_pass_filter * attackFilter;
-   low_pass_filter * releaseFilter;
+   LPF_6db * attackFilter;
+   LPF_6db * releaseFilter;
 }dynamics_filter;
 
 dynamics_filter *dynamics_filter_new(const float attack_time, 

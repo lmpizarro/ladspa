@@ -9,13 +9,18 @@
     <meta name="properties" value="HARD_RT_CAPABLE"/>
     <code>
       #include "ladspa-util.h"
+      #include "util/db.h"
     </code>
-
   </global>
 
-  <plugin label="eq_lm550" id="12046" class="UtilityPlugin">
+  <plugin label="eq_lm550" id="12046" class="FilterPlugin">
     <name>eq_lm550</name>
     <p>A plugin that implements the </p>
+
+    <callback event="instantiate"><![CDATA[
+      fs = s_rate;
+    ]]></callback>
+
 
     <callback event="run"><![CDATA[
       unsigned long pos;
@@ -27,15 +32,27 @@
       float p1G = DB_CO(f1Gain);
       float p2G = DB_CO(f2Gain);
       float p3G = DB_CO(f3Gain);
+      float tmp;
+      float p1Freqs [7] ={30.0f, 40.0f, 50.0f, 100.0f, 200.0f, 300.0f, 400.0f}; 
+      float p2Freqs [7] ={200.0f, 400.0f, 600.0f, 800.0f, 1500.0f, 3000.0f, 5000.0f}; 
+      float p3Freqs [7] ={2500.0f, 5000.0f, 7000.0f, 10000.0f, 12500.0f, 15000.0f, 20000.0f}; 
 
-      if (f1Fc == 0) p1Fc = 30.0f;
-      if (f2Fc == 0) p2Fc = 200.0f;
-      if (f3Fc == 0) p3Fc = 2500.0f;
+
+      p1Fc = p1Freqs[(int)f1Fc];
+      p2Fc = p2Freqs[(int)f2Fc];
+      p3Fc = p3Freqs[(int)f3Fc];
+      if (BPON == 1) tmp = 1.0f;
+      if (LFSHON == 1) tmp = 1.0f;
+      if (HFSHON == 1) tmp = 1.0f;
     
       p1Fc = 1.0f * p1Fc * p2Fc * p3Fc * p1G * p2G * p3G;
 
       for (pos = 0; pos < sample_count; pos++) {
-        buffer_write(output[pos], input[pos]*(1-dryWet) + dryWet * input[pos] * iGain * oGain);
+        tmp = input[pos]*(1-dryWet) + dryWet * input[pos] * iGain * oGain * fs;
+        tmp = 1.0f + tmp;
+        buffer_write(output[pos], input[pos] );
+        *(plugin_data->inpAmp) = lin2db(input[pos]);
+        *(plugin_data->outAmp) = lin2db(output[pos]);
       }
       ]]></callback>
 
@@ -45,8 +62,8 @@
       <range min="-12" max="+12"/>
     </port>
 
-    <port label="f1Fc" dir="input" type="control" hint="integer,default_0">
-	<name>f1Fc Khz(0|.03, 1|.04, 2|.05, 3|.1, 4|.2, 5|.3, 6|.4)</name>
+    <port label="f1Fc" dir="input" type="control" hint="default_0, integer">
+	<name>f1Fc Khz(0=.03, 1=.04, 2=.05, 3=.1, 4=.2, 5=.3, 6=.4)</name>
 	<range min="0" max="6"/>
     </port>
 
@@ -56,7 +73,7 @@
       <range min="-5" max="+5"/>
     </port>
 
-    <port label="f2Fc" dir="input" type="control" hint="integer,default_0">
+    <port label="f2Fc" dir="input" type="control" hint="integer,default_middle">
 	<name>f2Fc Khz(0|.2, 1|.4, 2|.6, 3|.8, 4|1.5, 5|3.0, 6|5.0)</name>
 	<range min="0" max="6"/>
     </port>
@@ -67,7 +84,7 @@
       <range min="-5" max="+5"/>
     </port>
 
-    <port label="f3Fc" dir="input" type="control" hint="integer,default_0">
+    <port label="f3Fc" dir="input" type="control" hint="integer,default_middle">
 	<name>f3Fc Khz (0|2.5, 1|5.0, 2|7.0, 3|10.0, 4|12.5, 5|15.0, 6|20.0)</name>
 	<range min="0" max="6"/>
     </port>
@@ -90,6 +107,21 @@
       <range min="0" max="+1"/>
     </port>
 
+    <port label="BPON" dir="input" type="control" hint="integer,default_0">
+      <name>BP active(0 = ON, 1 = OFF)</name>
+      <p>BP 50 15Kz activate</p>
+      <range min="0" max="1"/>
+    </port>
+    <port label="LFSHON" dir="input" type="control" hint="integer,default_0">
+      <name>LFSH active(0 = ON, 1 = OFF)</name>
+      <p>activate LFSH or PEAK</p>
+      <range min="0" max="1"/>
+    </port>
+    <port label="HFSHON" dir="input" type="control" hint="integer,default_0">
+      <name>HFSH active(0 = ON, 1 = OFF)</name>
+      <p>activate HFSH or PEAK</p>
+      <range min="0" max="1"/>
+    </port>
 
     <port label="input" dir="input" type="audio">
       <name>Input</name>
@@ -99,5 +131,19 @@
       <name>Output</name>
     </port>
 
+    <port label="inpAmp" dir="output" type="control">
+      <name>Amplitude (dB)</name>
+      <p>The level of the input signal, in decibels.</p>
+      <range min="-40" max="+12"/>
+    </port>
+
+    <port label="outAmp" dir="output" type="control">
+      <name>Amplitude (dB)</name>
+      <p>The level of the input signal, in decibels.</p>
+      <range min="-40" max="+12"/>
+    </port>
+
+
+    <instance-data label="fs" type="float" />
   </plugin>
 </ladspa>

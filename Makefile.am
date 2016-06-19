@@ -34,7 +34,7 @@ plugin_LTLIBRARIES = \
 	latency_1914.la xfade_1915.la sc4m_1916.la \
 	mbeq_1197.la pitch_scale_1193.la pitch_scale_1194.la imp_1199.la \
 	sidechainer_12044.la low_cut_75_12043.la colourSigmoid_12041.la \
-	rms_filter_12045.la eq_lm550_12046.la 
+	rms_filter_12045.la eq_lm550_12046.la eqChanStrip_12040.la 
 
 SUBDIRS = po util gsm gverb metadata
 
@@ -76,6 +76,7 @@ sc4_1882_la_LIBADD = -Lutil -ldb -lrms
 sc4m_1916_la_LIBADD = -Lutil -ldb -lrms
 se4_1883_la_LIBADD = -Lutil -ldb -lrms
 rms_filter_12045_la_LIBADD = -Lutil -lfilters
+eq_lm550_12046_la_LIBADD = -Lutil -ldb
 gsm_1215_la_LIBADD = gsm/libgsm.a
 gverb_1216_la_LIBADD = -Lgverb -lgverb
 lcr_delay_1436_la_DEPENDENCIES = util/biquad.h
@@ -94,6 +95,8 @@ butterworth_1902_la_LIBADD = -Lutil -liir
 butterworth_1902_la_SOURCES = butterworth_1902.c
 low_cut_75_12043_la_LIBADD = -Lutil -liir
 low_cut_75_12043_la_SOURCES = low_cut_75_12043.c 
+eqChanStrip_12040_la_LIBADD = -Lutil -liir -lrms
+eqChanStrip_12040_la_SOURCES = eqChanStrip_12040.c
 
 # Rule to build .c files from XML source
 %.c:	%.xml

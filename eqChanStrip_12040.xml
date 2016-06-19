@@ -1,0 +1,181 @@
+<?xml version="1.0"?>
+<!DOCTYPE ladspa SYSTEM "ladspa-swh.dtd">
+<?xml-stylesheet href="ladspa.css" type="text/css"?>
+
+<ladspa>
+  <global>
+    <meta name="maker" value="Luis Maria Pizarro &lt;lmpizarro@gmail.com&gt;"/>
+    <meta name="copyright" value="GPL"/>
+    <meta name="properties" value="HARD_RT_CAPABLE"/>
+    <code>
+      #include "util/iir.h"
+      #include "util/rms.h"
+      #include "util/biquad.h"
+    </code>
+  </global>
+
+  <plugin label="eqChanStripH" id="12040" class="ChannelStrip">
+    <name>Channel Strip Equalizer</name>
+    <p>shelving filters.</p>
+    <p>For details see the  (section \ref{eqChanStripH}).</p>
+
+    <callback event="instantiate"><![CDATA[
+       fs = s_rate;
+
+       rms_atten = rms_env_new();
+       filters = calloc(4, sizeof(biquad));
+       biquad_init(&filters[0]);
+       biquad_init(&filters[1]);
+       biquad_init(&filters[2]);
+       biquad_init(&filters[3]);
+	atten = 1.0f;
+    ]]></callback>
+
+    <callback event="activate"><![CDATA[
+       biquad_init(&filters[0]);
+       biquad_init(&filters[1]);
+       biquad_init(&filters[2]);
+       biquad_init(&filters[3]);
+	atten = 1.0f;
+    ]]></callback>
+
+    <callback event="run"><![CDATA[
+        unsigned long pos;
+        int op = f_round(activate);
+        LADSPA_Data in;
+        LADSPA_Data bw_L, fc_L;
+        LADSPA_Data fc_1, bw_1;
+        LADSPA_Data fc_2, bw_2;
+	LADSPA_Data fc_3, bw_3;
+
+	LADSPA_Data *t_inp;
+
+	t_inp = malloc(sample_count* sizeof(LADSPA_Data)); 
+
+        memcpy(t_inp, input, sample_count*sizeof(LADSPA_Data) );
+
+	atten =0.0f;
+	if (op == 1){ 
+	    butterworth_stage(gt, 1, 70.0f, 1.30f, fs);
+            iir_process_buffer_1s_5(iirf, gt, input, output, sample_count,0);
+	
+        }
+	//gain_L = -15.0f;
+	bw_L = 1.0f;
+	fc_L = 75.f;
+        ls_set_params(&filters[0], fc_L, gain_L, bw_L, fs);  // 20 < fc_L < 1000  bw_L = 1 gain_L = -70
+
+        fc_1 = 250.0f; // 0.00498866f; 220.0f / 44100
+        bw_1 = 3.0f;
+        eq_set_params(&filters[1], fc_1, gain_1, bw_1, fs);  //fc_1 = 220 bw_1 = 1.63 
+
+        fc_2 = 1500.0f; // 0.04761904f; 2100.0f / 44100;
+        bw_2 = 2.80f;
+        eq_set_params(&filters[2], fc_2, gain_2, bw_2, fs);  //fc_2 = 2100 bw_2 = 1.8 
+
+        fc_3 = 7000.0f; // 0.17913832f; 7900.0f / 44100;
+        bw_3 = 2.50f;
+        eq_set_params(&filters[3], fc_3, gain_3, bw_3, fs);  //fc_3 = 7900 bw_3 =1.79
+
+	for (pos = 0; pos < sample_count; pos++) {
+	       if (op ==  1)
+	          in = biquad_run(&filters[0], output[pos]);
+	       else{
+	          in = biquad_run(&filters[0], input[pos]);
+	       }
+
+	        in = biquad_run(&filters[1], in);
+	        in = biquad_run(&filters[2], in);
+	        in = biquad_run(&filters[3], in);
+		in = ((2.0f / (1.0f + exp(-0.5f*in)) - 1.0f)/ 0.247267f);
+		buffer_write(output[pos], in);
+		atten = rms_env_process(rms_atten,  (float)output[pos]);
+
+	}
+		plugin_data->atten = atten;
+		*(plugin_data->attenuation) = CO_DB(atten);
+		rms_env_reset(rms_atten);
+
+       // Unused variable
+       (void)(run_adding_gain);
+
+       free(t_inp);
+
+    ]]></callback>
+
+    <callback event="activate"><![CDATA[
+        gt = init_iir_stage(IIR_STAGE_LOWPASS,1,3,2);
+        iirf = init_iirf_t(gt);
+
+	butterworth_stage(gt, 1, 70.0f, 1.30f, fs);
+
+        biquad_init(&filters[0]);
+        biquad_init(&filters[1]);
+        biquad_init(&filters[2]);
+        biquad_init(&filters[3]);
+    ]]></callback>
+
+    <callback event="cleanup"><![CDATA[
+         free_iirf_t(plugin_data->iirf, plugin_data->gt);
+         free_iir_stage(plugin_data->gt);
+         rms_env_free(plugin_data->rms_atten);
+         free(plugin_data->filters);
+    ]]></callback>
+
+    <port label="gain_L" dir="input" type="control" hint="default_0">
+      <name>Low-Shelv gain </name>
+      <range min="-15" max="15"/>
+    </port>
+
+    <port label="gain_1" dir="input" type="control" hint="default_0">
+      <name>0.25 khz gain (dB)</name>
+      <range min="-15" max="+15"/>
+    </port>
+
+    <port label="gain_2" dir="input" type="control" hint="default_0">
+      <name>1.5 khz gain (dB)</name>
+      <range min="-15" max="+15"/>
+    </port>
+
+    <port label="gain_3" dir="input" type="control" hint="default_0">
+      <name>7.0 khz gain (dB)</name>
+      <range min="-15" max="+15"/>
+    </port>
+
+
+    <port label="input" dir="input" type="audio">
+      <name>Input</name>
+      <range min="-1.0" max="+1.0"/>
+    </port>
+
+    <port label="output" dir="output" type="audio">
+      <name>Output</name>
+      <range min="-1.0" max="+1.0"/>
+    </port>
+
+    <port label="activate" dir="input" type="control" hint="integer,default_1">
+    <name>Activate 75Hz Filter (0 = deactive, 1 = active)</name>
+    <p>Controls activate filter. </p>
+    <range min="0" max="1"/>
+    </port>
+
+
+    <port label="attenuation" dir="output" type="control">
+      <name>Stage Gain (dB)</name>
+      <p>The current Gain of the signal coming out of the Colour module.</p>
+      <range min="-70" max="0"/>
+    </port>
+
+
+
+
+    <instance-data label="rms_atten" type="rms_env *" />
+    <instance-data label="atten" type="float" />
+
+    <instance-data label="iirf" type="iirf_t*"/>
+    <instance-data label="gt" type="iir_stage_t*"/> 
+    
+    <instance-data label="fs" type="float"/>
+    <instance-data label="filters" type="biquad *"/>
+  </plugin>
+</ladspa>

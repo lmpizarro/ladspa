@@ -166,6 +166,10 @@ int test_eq550 (){
   for (i=0; i < N_PKF; i++)
     fprintf(stdout, "%f %f %f\n", eq5->lpkFs[i], eq5->mpkFs[i], eq5->hpkFs[i]);
 
+  for (i=0; i < N_PKF; i++)
+    EQLM550_R(eq5, 1.0f);
+
+
   EQLM550_D(eq5);
   return 0;
 }

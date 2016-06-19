@@ -97,7 +97,7 @@ low_cut_75_12043_la_SOURCES = low_cut_75_12043.c
 eqChanStrip_12040_la_LIBADD = -Lutil -liir
 eqChanStrip_12040_la_SOURCES = eqChanStrip_12040.c
 eqChanStrip_12040_la_DEPENDENCIES = util/biquad.h
-eq_lm550_12046_la_LIBADD = -Lutil -ldb -lfilters
+eq_lm550_12046_la_LIBADD = -Lutil -ldb -leqlm550a -lfilters
 eq_lm550_12046_la_SOURCES = eq_lm550_12046.c
 
 # Rule to build .c files from XML source

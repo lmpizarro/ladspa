@@ -299,6 +299,9 @@ void LF_SHELV_Set_G(S2_FLT *f, const float G){
   }
 }
 
+void LF_SHELV_Set_FC(S2_FLT *f, const float G){
+
+}
 
 float LF_SHELV_R (S2_FLT *f, const float inp){
     return  S2_FLT_R (f, inp);
@@ -354,6 +357,10 @@ void HF_SHELV_Set_G(S2_FLT *f, const float G){
   }
 }
 
+void HF_SHELV_Set_FC(S2_FLT *f, const float G){
+
+}
+
 float HF_SHELV_R (S2_FLT *f, const float inp){
     return  S2_FLT_R (f, inp);
 }
@@ -376,6 +383,7 @@ S2_FLT *PEAK_C (const float fc, const float fs){
   return f;
 }
 void PEAK_Set_G (S2_FLT *f, const float g){}
+void PEAK_Set_FC (S2_FLT *f, const float g){}
 float PEAK_R (S2_FLT *f, const float inp){
   return S2_FLT_R(f, inp);
 }
@@ -408,8 +416,19 @@ float EQLM550_R(EQLM550 * f, const float inp){
    PEAK_Set_G(f->LPK, f->lpkG);
    PEAK_Set_G(f->MPK, f->mpkG);
    PEAK_Set_G(f->HPK, f->hpkG);
+
    LF_SHELV_Set_G(f->LSH, f->lpkG);
    HF_SHELV_Set_G(f->HSH, f->hpkG);
+
+   PEAK_Set_FC(f->LPK, f->lpkf);
+   PEAK_Set_FC(f->MPK, f->mpkf);
+   PEAK_Set_FC(f->HPK, f->hpkf);
+
+   LF_SHELV_Set_FC(f->LSH, f->lpkf);
+   HF_SHELV_Set_FC(f->HSH, f->hpkf);
+
+
+
 
    t1 = inp;
    if (f->bpfON) t1 = BPF_R(f->BPF, t1);

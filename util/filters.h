@@ -96,6 +96,7 @@ void BPF_D (S2_FLT *f);
  */
 S2_FLT *LF_SHELV_C (const float fc, const float fs);
 void LF_SHELV_Set_G (S2_FLT *, const float);
+void LF_SHELV_Set_FC (S2_FLT *, const float);
 float LF_SHELV_R (S2_FLT *, const float);
 void LF_SHELV_D (S2_FLT *);
 
@@ -104,6 +105,7 @@ void LF_SHELV_D (S2_FLT *);
  */
 S2_FLT *HF_SHELV_C (const float fc, const float fs);
 void HF_SHELV_Set_G (S2_FLT *, const float);
+void HF_SHELV_Set_FC (S2_FLT *, const float);
 float HF_SHELV_R (S2_FLT *, const float);
 void HF_SHELV_D (S2_FLT *);
 
@@ -112,6 +114,7 @@ void HF_SHELV_D (S2_FLT *);
  */
 S2_FLT *PEAK_C (const float fc, const float fs);
 void PEAK_Set_G (S2_FLT *, const float);
+void PEAK_Set_FC (S2_FLT *, const float);
 float PEAK_R (S2_FLT *, const float);
 void PEAK_D (S2_FLT *);
 

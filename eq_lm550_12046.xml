@@ -1,0 +1,103 @@
+<?xml version="1.0"?>
+<!DOCTYPE ladspa SYSTEM "ladspa-swh.dtd">
+<?xml-stylesheet href="ladspa.css" type="text/css"?>
+
+<ladspa>
+  <global>
+    <meta name="maker" value=" Luis Maria Pizarro &lt;lmpizarro@gmail.com&gt;"/>
+    <meta name="copyright" value="GPL"/>
+    <meta name="properties" value="HARD_RT_CAPABLE"/>
+    <code>
+      #include "ladspa-util.h"
+    </code>
+
+  </global>
+
+  <plugin label="eq_lm550" id="12046" class="UtilityPlugin">
+    <name>eq_lm550</name>
+    <p>A plugin that implements the </p>
+
+    <callback event="run"><![CDATA[
+      unsigned long pos;
+      float iGain = DB_CO(inputGain);
+      float oGain = DB_CO(outputGain);
+      float p1Fc;
+      float p2Fc;
+      float p3Fc;
+      float p1G = DB_CO(f1Gain);
+      float p2G = DB_CO(f2Gain);
+      float p3G = DB_CO(f3Gain);
+
+      if (f1Fc == 0) p1Fc = 30.0f;
+      if (f2Fc == 0) p2Fc = 200.0f;
+      if (f3Fc == 0) p3Fc = 2500.0f;
+    
+      p1Fc = 1.0f * p1Fc * p2Fc * p3Fc * p1G * p2G * p3G;
+
+      for (pos = 0; pos < sample_count; pos++) {
+        buffer_write(output[pos], input[pos]*(1-dryWet) + dryWet * input[pos] * iGain * oGain);
+      }
+      ]]></callback>
+
+    <port label="inputGain" dir="input" type="control" hint="default_0">
+      <name>InGain</name>
+      <p>Controls the gain of the input signal in dB's.</p>
+      <range min="-12" max="+12"/>
+    </port>
+
+    <port label="f1Fc" dir="input" type="control" hint="integer,default_0">
+	<name>f1Fc Khz(0|.03, 1|.04, 2|.05, 3|.1, 4|.2, 5|.3, 6|.4)</name>
+	<range min="0" max="6"/>
+    </port>
+
+    <port label="f1Gain" dir="input" type="control" hint="integer,default_0">
+      <name>p1Gain DB(-5|-12 -4|-9 -3|-6 -2|-4 -1|-2 0|0 1|2 2|4 3|6 4|9 5|12)</name>
+      <p>Controls the gain of the peak 1 filter.</p>
+      <range min="-5" max="+5"/>
+    </port>
+
+    <port label="f2Fc" dir="input" type="control" hint="integer,default_0">
+	<name>f2Fc Khz(0|.2, 1|.4, 2|.6, 3|.8, 4|1.5, 5|3.0, 6|5.0)</name>
+	<range min="0" max="6"/>
+    </port>
+
+    <port label="f2Gain" dir="input" type="control" hint="integer,default_0">
+      <name>p2Gain DB(-5|-12 -4|-9 -3|-6 -2|-4 -1|-2 0|0 1|2 2|4 3|6 4|9 5|12)</name>
+      <p>Controls the gain of the peak 2 filter.</p>
+      <range min="-5" max="+5"/>
+    </port>
+
+    <port label="f3Fc" dir="input" type="control" hint="integer,default_0">
+	<name>f3Fc Khz (0|2.5, 1|5.0, 2|7.0, 3|10.0, 4|12.5, 5|15.0, 6|20.0)</name>
+	<range min="0" max="6"/>
+    </port>
+
+    <port label="f3Gain" dir="input" type="control" hint="integer,default_0">
+      <name>p3Gain DB(-5|-12 -4|-9 -3|-6 -2|-4 -1|-2 0|0 1|2 2|4 3|6 4|9 5|12)</name>
+      <p>Controls the gain of the peak 3 filter.</p>
+      <range min="-5" max="+5"/>
+    </port>
+
+    <port label="outputGain" dir="input" type="control" hint="default_0">
+      <name>OutGain</name>
+      <p>Controls the gain of the output signal in dB's.</p>
+      <range min="-12" max="+12"/>
+    </port>
+
+    <port label="dryWet" dir="input" type="control" hint="default_0">
+      <name>Dry/Wet</name>
+      <p>Controls the gain of the output signal in dB's.</p>
+      <range min="0" max="+1"/>
+    </port>
+
+
+    <port label="input" dir="input" type="audio">
+      <name>Input</name>
+    </port> 
+
+    <port label="output" dir="output" type="audio">
+      <name>Output</name>
+    </port>
+
+  </plugin>
+</ladspa>

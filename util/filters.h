@@ -125,6 +125,11 @@ void PEAK_D (S2_FLT *);
 #define BP_MIN 50
 #define BP_MAX 15000
 #define BP_FC  640
+/*
+ * http://apiaudio.com/product_specs.php?id=106
+ * 550A Discrete 3 Band EQ
+ */
+
 
 typedef struct{
   S2_FLT *LSH; //low shelving

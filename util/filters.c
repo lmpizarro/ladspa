@@ -223,10 +223,18 @@ void LPF_D (S2_FLT *f){
 /*
  * Band Pass Filter
  */
-S2_FLT *BPF_C (const float fc, const float q, const float fs){}
+S2_FLT *BPF_C (const float fc, const float q, const float fs){
+  S2_FLT *f = (S2_FLT *) calloc(1, sizeof(S2_FLT));
+
+  return f;
+}
 void BPF_Set_Fc(S2_FLT *f, const float fc){}
 void BPF_Set_Q(S2_FLT *f, const float fc){}
-float BPF_R (S2_FLT *lp, float inp){}
+float BPF_R (S2_FLT *lp, float inp){
+  float out;
+  out = 0.0f;
+  return out;
+}
 void BPF_D (S2_FLT *f){}
 
 

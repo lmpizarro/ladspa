@@ -123,25 +123,30 @@ void PEAK_D (S2_FLT *);
 #define HSH_FC 8000
 #define BP_MIN 50
 #define BP_MAX 15000
-#define BP_FC  640
+#define BP_FC  806
 /*
  * http://apiaudio.com/product_specs.php?id=106
  * 550A Discrete 3 Band EQ
  */
 
-
 typedef struct{
   S2_FLT *LSH; //low shelving
-  S2_FLT *HPS; //high pass
   S2_FLT *LPK; //low peak
   S2_FLT *MPK; //mid peak
   S2_FLT *HPK; //high peak
   S2_FLT *HSH; //high shelving
-}CH_STRP_550;
+  S2_FLT *BPF; //band pass
+  float lpkG, mpkG, hpkG;
+  float lpkf, mpkf, hpkf;
+  int bpfON, lshON, hshON;
+  float out;
+}EQLM550;
 
-CH_STRP_550 * CH_STRP_550_C(const float fs);
-float CH_STRP_550_R(CH_STRP_550 * ch, const float inp);
-void CH_STRP_550_D(CH_STRP_550 * ch);
+EQLM550 * EQLM550_C(const float fs);
+float EQLM550_R(EQLM550 * ch, const float inp);
+void EQLM550_D(EQLM550 * ch);
+//void EQLM550_P(EQLM550 *, float *, int *);
+
 
 /*
  *  http://sound.westhost.com/project84.htm
@@ -153,6 +158,11 @@ void CH_STRP_550_D(CH_STRP_550 * ch);
 /*
  * http://mail.manley.com/msmpx.php
  * Manley Massive Passive Stereo Tube EQ
+ */
+
+/*
+ * search: juce plugin audio examples
+ * https://www.kvraudio.com/forum/viewtopic.php?t=326917
  */
 
 #endif

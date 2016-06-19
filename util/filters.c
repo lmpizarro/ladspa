@@ -388,30 +388,56 @@ void PEAK_D (S2_FLT *f){
  */
 
 /*
- * CH_STRP_550_D 
+ * EQ_550_D 
  */
-CH_STRP_550 * CH_STRP_550_C(const float fs){
-  CH_STRP_550 *f = (CH_STRP_550 *) calloc(1, sizeof(CH_STRP_550));
+EQLM550 * EQLM550_C(const float fs){
+  EQLM550 *f = (EQLM550 *) calloc(1, sizeof(EQLM550));
 
   f->LSH = LF_SHELV_C (LSH_FC, fs);
-  f->HPS = HPF_C(HPS_FC, fs);
   f->MPK = PEAK_C (MPK_FC, fs);
   f->HPK = PEAK_C (HPK_FC, fs);
   f->LPK = PEAK_C (LPK_FC, fs);
   f->HSH = HF_SHELV_C(HSH_FC, fs) ;
+  f->BPF = BPF_C(BP_FC, BP_FC/(BP_MAX - BP_MIN), fs) ;
 
   return f;
 }
-float CH_STRP_550_R(CH_STRP_550 * ch, const float inp){
-   float out;
+float EQLM550_R(EQLM550 * f, const float inp){
+   float t1;
+
+   PEAK_Set_G(f->LPK, f->lpkG);
+   PEAK_Set_G(f->MPK, f->mpkG);
+   PEAK_Set_G(f->HPK, f->hpkG);
+   LF_SHELV_Set_G(f->LSH, f->lpkG);
+   HF_SHELV_Set_G(f->HSH, f->hpkG);
+
+   t1 = inp;
+   if (f->bpfON) t1 = BPF_R(f->BPF, t1);
+   if (f->lshON) 
+     t1 = LF_SHELV_R(f->LSH, t1);
+   else
+     t1 = PEAK_R(f->LPK, t1);
+
+   t1 = PEAK_R(f->MPK, t1);
    
-   out = PEAK_R(ch->LPK, LF_SHELV_R(ch->LSH, HPF_R(ch->HPS, inp)));
-   out = HF_SHELV_R(ch->HSH, PEAK_R(ch->HPK,PEAK_R(ch->MPK, out)));
+   if (f->hshON) 
+      t1 = HF_SHELV_R(f->HSH, t1);
+   else
+      t1 = PEAK_R(f->HPK, t1);
 
-
-   return out;
+   f->out = t1;
+   return t1;
 }
-void CH_STRP_550_D(CH_STRP_550 * ch){}
+void EQLM550_D(EQLM550 * f){
+
+  PEAK_D(f->MPK);	
+  PEAK_D(f->HPK);	
+  PEAK_D(f->LPK);
+  HF_SHELV_D(f->HSH);
+  LF_SHELV_D(f->LSH);
+  BPF_D(f->BPF);
+  free(f);
+}
 
 
 /*

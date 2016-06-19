@@ -40,14 +40,15 @@
       inpRMS = 0.0f;
       outRMS = 0.0f;
       for (pos = 0; pos < sample_count; pos++) {
-        ampInp = pow(10,inputGain/20) * input[pos];
-	inpSq =  ampInp * ampInp;
+      ampInp = pow(10,inputGain/20) * input[pos];
+
+	inpSq =  ampInp;
 
         inpRMS = rms_filter_process(rmsFilterINP, inpSq);
 
         buffer_write(output[pos], ampInp);
 
-        outSq =  output[pos] * output[pos];
+        outSq =  output[pos] ;
         outRMS = rms_filter_process(rmsFilterOUT, outSq);
       }
 

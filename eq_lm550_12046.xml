@@ -21,6 +21,7 @@
       fs = s_rate;
       rmsFilterINP = rms_filter_new(5.0f, fs);
       rmsFilterOUT = rms_filter_new(5.0f, fs);
+      eqLm550 = EQLM550_C(fs);
     ]]></callback>
 
     <callback event="activate"> 
@@ -29,32 +30,34 @@
     <callback event="cleanup">
        rms_filter_free(plugin_data->rmsFilterINP);
        rms_filter_free(plugin_data->rmsFilterOUT);
+       EQLM550_D(plugin_data->eqLm550);
     </callback>
 
     <callback event="run"><![CDATA[
       unsigned long pos;
       float iGain = DB_CO(inputGain);
       float oGain = DB_CO(outputGain);
-      float p1Fc;
-      float p2Fc;
-      float p3Fc;
-      float p1G = DB_CO(f1Gain);
-      float p2G = DB_CO(f2Gain);
-      float p3G = DB_CO(f3Gain);
       float tmp;
       float p1Freqs [7] ={30.0f, 40.0f, 50.0f, 100.0f, 200.0f, 300.0f, 400.0f}; 
       float p2Freqs [7] ={200.0f, 400.0f, 600.0f, 800.0f, 1500.0f, 3000.0f, 5000.0f}; 
       float p3Freqs [7] ={2500.0f, 5000.0f, 7000.0f, 10000.0f, 12500.0f, 15000.0f, 20000.0f}; 
       float out;
 
-      p1Fc = p1Freqs[(int)f1Fc];
-      p2Fc = p2Freqs[(int)f2Fc];
-      p3Fc = p3Freqs[(int)f3Fc];
-      if (BPON == 1) tmp = 1.0f;
-      if (LFSHON == 1) tmp = 1.0f;
-      if (HFSHON == 1) tmp = 1.0f;
+      eqLm550->lpkf = p1Freqs[(int)f1Fc];
+      eqLm550->mpkf= p2Freqs[(int)f2Fc];
+      eqLm550->hpkf= p3Freqs[(int)f3Fc];
+
+      eqLm550->lpkG = DB_CO(f1Gain);
+      eqLm550->mpkG = DB_CO(f2Gain);
+      eqLm550->hpkG=  DB_CO(f3Gain);
+
+      eqLm550->bpfON = 0;
+      eqLm550->lshON = 0;
+      eqLm550->hshON= 0;
+      if (BPON == 1) eqLm550->bpfON = 1;
+      if (LFSHON == 1) eqLm550->lshON = 1;
+      if (HFSHON == 1) eqLm550->hshON= 1;
     
-      p1Fc = 1.0f * p1Fc * p2Fc * p3Fc * p1G * p2G * p3G;
 
       for (pos = 0; pos < sample_count; pos++) {
         tmp = input[pos]*(1-dryWet) + dryWet * input[pos] * iGain * oGain * fs;
@@ -159,5 +162,6 @@
     <instance-data label="fs" type="float" />
     <instance-data label="rmsFilterINP" type="rms_filter *"/>
     <instance-data label="rmsFilterOUT" type="rms_filter *"/>
+    <instance-data label="eqLm550" type="EQLM550 *"/>
   </plugin>
 </ladspa>

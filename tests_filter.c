@@ -2,9 +2,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "util/filters.h"
+#include "util/eqlm550a.h"
 
-//  gcc -o main tests.c  -lm -L../ladspa/util -lfilters
-
+// gcc -o main tests_filter.c  -lm -Lutil -leqlm550a -lfilters
 
 int test_rms ()
 {

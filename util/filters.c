@@ -24,7 +24,6 @@ LPF_6db *LPF_6db_C(const float fc, const float sr)
   new->mout = 0.0f;
 
   return new;
-
 }
 
 float LPF_6db_R (LPF_6db *lp, float inp){
@@ -213,7 +212,9 @@ S2_FLT *LPF_C (const float fc, const float fs){
   return(new_hpf);
 }
 
-void LPF_Set_Fc(S2_FLT *f, const float fc){}
+void LPF_Set_Fc(S2_FLT *f, const float fc){
+// TODO
+}
 float LPF_R (S2_FLT *f, float inp){
     return  S2_FLT_R (f, inp);
 }
@@ -227,16 +228,21 @@ void LPF_D (S2_FLT *f){
 S2_FLT *BPF_C (const float fc, const float q, const float fs){
   S2_FLT *f = (S2_FLT *) calloc(1, sizeof(S2_FLT));
 
+// TODO
   return f;
 }
-void BPF_Set_Fc(S2_FLT *f, const float fc){}
-void BPF_Set_Q(S2_FLT *f, const float fc){}
-float BPF_R (S2_FLT *lp, float inp){
-  float out;
-  out = 0.0f;
-  return out;
+void BPF_Set_Fc(S2_FLT *f, const float fc){
+// TODO
 }
-void BPF_D (S2_FLT *f){}
+void BPF_Set_Q(S2_FLT *f, const float fc){
+// TODO
+}
+float BPF_R (S2_FLT *f, float inp){
+   return  S2_FLT_R (f, inp);
+}
+void BPF_D (S2_FLT *f){
+   S2_FLT_D(f);
+}
 
 
 /*
@@ -301,7 +307,7 @@ void LF_SHELV_Set_G(S2_FLT *f, const float G){
 }
 
 void LF_SHELV_Set_FC(S2_FLT *f, const float G){
-
+// TODO
 }
 
 float LF_SHELV_R (S2_FLT *f, const float inp){
@@ -359,11 +365,11 @@ void HF_SHELV_Set_G(S2_FLT *f, const float G){
 }
 
 void HF_SHELV_Set_FC(S2_FLT *f, const float G){
-
+// TODO
 }
 
 float HF_SHELV_R (S2_FLT *f, const float inp){
-    return  S2_FLT_R (f, inp);
+  return  S2_FLT_R (f, inp);
 }
 void HF_SHELV_D (S2_FLT *f){
   S2_FLT_D(f);
@@ -383,8 +389,13 @@ S2_FLT *PEAK_C (const float fc, const float fs){
 
   return f;
 }
-void PEAK_Set_G (S2_FLT *f, const float g){}
-void PEAK_Set_FC (S2_FLT *f, const float g){}
+void PEAK_Set_G (S2_FLT *f, const float g){
+
+//TODO
+}
+void PEAK_Set_FC (S2_FLT *f, const float g){
+//TODO
+}
 float PEAK_R (S2_FLT *f, const float inp){
   return S2_FLT_R(f, inp);
 }

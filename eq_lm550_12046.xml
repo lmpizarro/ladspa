@@ -53,14 +53,13 @@
       if (BPON == 1) eqLm550->bpfON = 1;
       if (LFSHON == 1) eqLm550->lshON = 1;
       if (HFSHON == 1) eqLm550->hshON= 1;
-    
 
       for (pos = 0; pos < sample_count; pos++) {
 
 	out = (input[pos] * (1 - dryWet) + dryWet * EQLM550_R(eqLm550, input[pos] *iGain))  * oGain;
 	buffer_write(output[pos], out);
 
-	*(plugin_data->guiRMSInp) = 20*log10(rms_filter_process(rmsFilterINP , input[pos]) + 0.001f);
+	*(plugin_data->guiRMSInp) = 20*log10(rms_filter_process(rmsFilterINP , input[pos] * iGain) + 0.001f);
 
         *(plugin_data->guiRMSOut) = 20*log10(rms_filter_process(rmsFilterOUT , output[pos]) + 0.001f);
       }

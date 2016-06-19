@@ -95,8 +95,9 @@ butterworth_1902_la_LIBADD = -Lutil -liir
 butterworth_1902_la_SOURCES = butterworth_1902.c
 low_cut_75_12043_la_LIBADD = -Lutil -liir
 low_cut_75_12043_la_SOURCES = low_cut_75_12043.c 
-eqChanStrip_12040_la_LIBADD = -Lutil -liir -lrms
+eqChanStrip_12040_la_LIBADD = -Lutil -liir
 eqChanStrip_12040_la_SOURCES = eqChanStrip_12040.c
+eqChanStrip_12040_la_DEPENDENCIES = util/biquad.h
 
 # Rule to build .c files from XML source
 %.c:	%.xml

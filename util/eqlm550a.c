@@ -45,6 +45,11 @@ float EQLM550_R(EQLM550 * f, const float inp){
    PEAK_Set_G(f->MPK, f->mpkG);
    PEAK_Set_G(f->HPK, f->hpkG);
 
+   PEAK_Set_PropQ(f->LPK, f->lpkG);
+   PEAK_Set_PropQ(f->MPK, f->mpkG);
+   PEAK_Set_PropQ(f->HPK, f->hpkG);
+
+
    LF_SHELV_Set_G(f->LSH, f->lpkG);
    HF_SHELV_Set_G(f->HSH, f->hpkG);
 
@@ -72,6 +77,7 @@ float EQLM550_R(EQLM550 * f, const float inp){
    f->out = t1;
    return t1;
 }
+
 void EQLM550_D(EQLM550 * f){
 
   PEAK_D(f->MPK);	

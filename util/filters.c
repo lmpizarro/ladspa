@@ -39,9 +39,11 @@ void LPF_6db_D(LPF_6db *lpf){
 }
 
 
-/*
+/*****************
+*   
 *   RMS filter
-*/
+*
+******************/
 rms_filter *rms_filter_new(const float fc, const float sr){
 
    rms_filter *new = (rms_filter *)calloc(1, sizeof(rms_filter));
@@ -108,11 +110,11 @@ void dynamics_filter_free(dynamics_filter *dyn){
 }
 
 void dynamics_filter_set_attack_time (dynamics_filter *dyn, const float attack_time) {
-    dyn->fcAttack = 1.0f / (attack_time * 2 * PI);
+    dyn->fcAttack = 1.0f / (attack_time * 2.0f * PI);
 }
 
 void dynamics_filter_set_release_time (dynamics_filter *dyn, const float release_time) {
-    dyn->fcRelease = 1.0f / (release_time *2 * PI);
+    dyn->fcRelease = 1.0f / (release_time * 2.0f * PI);
 }
 
 float dynamics_filter_gain1 (dynamics_filter *dyn, const float gain) {
@@ -155,7 +157,7 @@ void S2_FLT_D (S2_FLT *f){
 /*
  *    High Pass Filter
  */
-void HPF_SET_COEFF(S2_FLT *f, const float fc){
+void HPF_SET_COEFF(S2_FLT *f){
   float K;
   float den;
 
@@ -178,7 +180,7 @@ S2_FLT *HPF_C (const float fc, const float fs){
   f->fs = fs;
   
   S2_FLT_SET_FC (f, fc);
-  HPF_SET_COEFF(f, fc);
+  HPF_SET_COEFF(f);
 
   f->minp = 0.0f; 
   f->mminp = 0.0f;
@@ -199,9 +201,11 @@ void HPF_D (S2_FLT *f){
  *    END High Pass Filter
  */
 
-/*
+/************************
+ * 
  * Low Pass Filter
- */
+ *
+ ************************/
 void LPF_SET_COEFF(S2_FLT *f, const float fc){
 // TODO
 }
@@ -267,12 +271,7 @@ S2_FLT *BPF_C (const float fc, const float q, const float fs){
   return f;
 }
 void BPF_Set_Fc(S2_FLT *f, const float fc){
-  
-  if (fc < f->fs / 2.0f)	
-    f->fc = fc;
-  else
-    f->fc = f->fs / 2.0f;
-
+  S2_FLT_SET_FC(f, fc);
   BPF_CALC_COEFF(f);
 }
 void BPF_Set_Q(S2_FLT *f, const float q){
@@ -282,16 +281,15 @@ void BPF_Set_Q(S2_FLT *f, const float q){
     f->Q = q;
 
   BPF_CALC_COEFF(f);
-
-
 }
+
 float BPF_R (S2_FLT *f, float inp){
    return  S2_FLT_R (f, inp);
 }
+
 void BPF_D (S2_FLT *f){
    S2_FLT_D(f);
 }
-
 
 /*
  *  SHELVING
@@ -301,8 +299,6 @@ void BPF_D (S2_FLT *f){
  * Low Freq Shelving
  */
 S2_FLT *LF_SHELV_C (const float fc, const float fs){
-  //float K;
-  //float den;
 
   S2_FLT *f = (S2_FLT *) calloc(1, sizeof(S2_FLT));
   f->fs = fs;
@@ -363,18 +359,14 @@ void LF_SHELV_Set_G(S2_FLT *f, const float v0){
 }
 
 void LF_SHELV_Set_FC(S2_FLT *f, const float fc){
-
-  if (fc < f->fs / 2.0f)	
-    f->fc = fc;
-  else
-    f->fc = f->fs / 2.0f;
-
+  S2_FLT_SET_FC(f,fc);
   LF_SHELV_CALC_COEFF(f);
 }
 
 float LF_SHELV_R (S2_FLT *f, const float inp){
     return  S2_FLT_R (f, inp);
 }
+
 void LF_SHELV_D (S2_FLT *f){
    S2_FLT_D(f);
 }
@@ -451,32 +443,29 @@ void HF_SHELV_D (S2_FLT *f){
 void PEAK_CALC_COEFF(S2_FLT *f){
   float K;
   float den;
-  float Qinf;
-
-  Qinf = 2.13f; //TODO
 
   K = tan(PI*f->fc*f->fs);
 
   if (f->V0 > 1.0f){
-    den = 1.0f +  K / Qinf + K * K;
+    den = 1.0f +  K / f->Q + K * K;
 
-    f->a0 = (1.0f + f->V0 * K / Qinf + K * K) /den ;
+    f->a0 = (1.0f + f->V0 * K / f->Q + K * K) /den ;
     f->a1 = 2.0f * (K*K - 1.0f) /den;
-    f->a2 =  (1.0f - f->V0 * K / Qinf + K * K)/den ;
+    f->a2 =  (1.0f - f->V0 * K / f->Q + K * K)/den ;
 
     f->b0 = 1.0f;
     f->b1 = 2.0f * (K*K - 1.0f) / den;
-    f->b2 =  (1.0f -  K / Qinf + K * K) /den ;
+    f->b2 =  (1.0f -  K / f->Q + K * K) /den ;
   } else if (f->V0 < 1.0f) {
-    den = 1.0f + f->V0 * K / Qinf + K * K;
+    den = 1.0f + f->V0 * K / f->Q + K * K;
 
-    f->a0 = (1.0f +  K / Qinf +  K * K) /den ;
+    f->a0 = (1.0f +  K / f->Q +  K * K) /den ;
     f->a1 = 2.0f * (K*K - 1.0f) /den;
-    f->a2 =  (1.0f -  K / Qinf + K * K) /den ;
+    f->a2 =  (1.0f -  K / f->Q + K * K) /den ;
 
     f->b0 = 1.0f;
     f->b1 = 2.0f * (K*K - 1.0f);
-    f->b2 =  (1.0f - f->V0 * K / Qinf + K * K ) /den ;
+    f->b2 =  (1.0f - f->V0 * K / f->Q + K * K ) /den ;
   }  else {
     f->a0 = 1.0f;
     f->a1 = 0.0f;
@@ -507,6 +496,25 @@ float PEAK_R (S2_FLT *f, const float inp){
   return S2_FLT_R(f, inp);
 }
 
+void PEAK_Set_Q (S2_FLT *f, const float q){
+  if (q <= 0) 
+    f->Q = sqrt(2);
+  else
+    f->Q = q;
+
+  PEAK_CALC_COEFF(f);
+
+}
+
+void PEAK_Set_PropQ (S2_FLT *f, const float linGain){
+  float q;
+  if (linGain < 1 && linGain > 0.0f) 
+    q = 0.75/linGain - 0.84f;
+  else 
+    q = 0.75f * linGain - 0.84f;
+   PEAK_Set_Q(f,q);
+}
+
 void PEAK_D (S2_FLT *f){
   S2_FLT_D(f);
 }
@@ -514,5 +522,3 @@ void PEAK_D (S2_FLT *f){
 /*
  *  END PEAK
  */
-
-

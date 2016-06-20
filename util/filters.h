@@ -61,6 +61,7 @@ typedef struct {
    float a0, a1, a2;
    float b0, b1, b2;
    float V0;
+   float Q;
 }S2_FLT;
 
 float S2_FLT_R (S2_FLT *f, float inp);

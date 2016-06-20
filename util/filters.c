@@ -7,7 +7,6 @@
 /*
 * LP Filter
 */
-
 LPF_6db *LPF_6db_C(const float fc, const float sr)
 {
 
@@ -141,6 +140,13 @@ float S2_FLT_R (S2_FLT *f, float inp){
   return out;
 }
 
+void S2_FLT_SET_FC (S2_FLT *f, const float fc){
+  if (fc < f->fs / 2.0f)	
+    f->fc = fc;
+  else
+    f->fc = f->fs / 2.0f;
+}
+
 void S2_FLT_D (S2_FLT *f){
   free(f);
 }
@@ -149,27 +155,10 @@ void S2_FLT_D (S2_FLT *f){
 /*
  *    High Pass Filter
  */
-S2_FLT *HPF_C (const float fc, const float fs){
-
-  S2_FLT *new_hpf = (S2_FLT *) calloc(1, sizeof(S2_FLT));
-
-  new_hpf->fs = fs;
-  
-  HPF_Set_Fc(new_hpf, fc);
-
-  new_hpf->minp = 0.0f; 
-  new_hpf->mminp = 0.0f;
-  new_hpf->mout = 0.0f; 
-  new_hpf->mmout = 0.0f;
-
-  return(new_hpf);
-}
-
-void HPF_Set_Fc(S2_FLT *f, const float fc){
+void HPF_SET_COEFF(S2_FLT *f, const float fc){
   float K;
   float den;
 
-  f->fc = fc;
 
   K = tan(PI*f->fc*f->fs);
   den = 1.0f + sqrt(2.0f)*K + K*K;
@@ -180,7 +169,23 @@ void HPF_Set_Fc(S2_FLT *f, const float fc){
   f->b0 = 1.0f;
   f->b1 = 2.0f*(K*K -1.0f) / den;
   f->b2 = 1.0f + K*K-sqrt(2.0f)*K / den;
+}
 
+S2_FLT *HPF_C (const float fc, const float fs){
+
+  S2_FLT *f = (S2_FLT *) calloc(1, sizeof(S2_FLT));
+
+  f->fs = fs;
+  
+  S2_FLT_SET_FC (f, fc);
+  HPF_SET_COEFF(f, fc);
+
+  f->minp = 0.0f; 
+  f->mminp = 0.0f;
+  f->mout = 0.0f; 
+  f->mmout = 0.0f;
+
+  return(f);
 }
 
 float HPF_R (S2_FLT *f, float inp){
@@ -197,24 +202,26 @@ void HPF_D (S2_FLT *f){
 /*
  * Low Pass Filter
  */
-S2_FLT *LPF_C (const float fc, const float fs){
-  S2_FLT *new_hpf = (S2_FLT *) calloc(1, sizeof(S2_FLT));
-
-  new_hpf->fs = fs;
-  
-  LPF_Set_Fc(new_hpf, fc);
-
-  new_hpf->minp = 0.0f; 
-  new_hpf->mminp = 0.0f;
-  new_hpf->mout = 0.0f; 
-  new_hpf->mmout = 0.0f;
-
-  return(new_hpf);
-}
-
-void LPF_Set_Fc(S2_FLT *f, const float fc){
+void LPF_SET_COEFF(S2_FLT *f, const float fc){
 // TODO
 }
+
+S2_FLT *LPF_C (const float fc, const float fs){
+  S2_FLT *f = (S2_FLT *) calloc(1, sizeof(S2_FLT));
+
+  f->fs = fs;
+  
+  S2_FLT_SET_FC (f, fc);
+  LPF_SET_COEFF(f, fc);
+
+  f->minp = 0.0f; 
+  f->mminp = 0.0f;
+  f->mout = 0.0f; 
+  f->mmout = 0.0f;
+
+  return(f);
+}
+
 float LPF_R (S2_FLT *f, float inp){
     return  S2_FLT_R (f, inp);
 }
@@ -225,17 +232,58 @@ void LPF_D (S2_FLT *f){
 /*
  * Band Pass Filter
  */
+
+void BPF_CALC_COEFF(S2_FLT *f){
+  float K;
+  float den;
+
+
+  K = tan(PI*f->fc*f->fs);
+  den = 1.0f + K/f->Q + K*K;
+  f->a0 = K/ (f->Q*den);
+  f->a1 = 0.0;
+  f->a2 = -f->a0;
+
+  f->b0 = 1.0f;
+  f->b1 = 2.0f*(K*K -1.0f) / den;
+  f->b2 = 1.0f + K*K-K/f->Q / den;
+
+
+}
+
 S2_FLT *BPF_C (const float fc, const float q, const float fs){
+
   S2_FLT *f = (S2_FLT *) calloc(1, sizeof(S2_FLT));
 
-// TODO
+  f->fc = fc;
+
+  
+  if (q <= 0) 
+    f->Q = sqrt(2);
+  else
+    f->Q = q;
+
+  BPF_CALC_COEFF(f);
   return f;
 }
 void BPF_Set_Fc(S2_FLT *f, const float fc){
-// TODO
+  
+  if (fc < f->fs / 2.0f)	
+    f->fc = fc;
+  else
+    f->fc = f->fs / 2.0f;
+
+  BPF_CALC_COEFF(f);
 }
-void BPF_Set_Q(S2_FLT *f, const float fc){
-// TODO
+void BPF_Set_Q(S2_FLT *f, const float q){
+  if (q <= 0) 
+    f->Q = sqrt(2);
+  else
+    f->Q = q;
+
+  BPF_CALC_COEFF(f);
+
+
 }
 float BPF_R (S2_FLT *f, float inp){
    return  S2_FLT_R (f, inp);
@@ -258,7 +306,9 @@ S2_FLT *LF_SHELV_C (const float fc, const float fs){
 
   S2_FLT *f = (S2_FLT *) calloc(1, sizeof(S2_FLT));
   f->fs = fs;
-  f->fc = fc;
+
+  S2_FLT_SET_FC(f, fc);
+
   f->V0 = 1.0f;
 
   //K = tan(PI*f->fc*f->fs);
@@ -273,12 +323,10 @@ S2_FLT *LF_SHELV_C (const float fc, const float fs){
   return f;
 }
 
-void LF_SHELV_Set_G(S2_FLT *f, const float G){
-  float K;
-  float den;
+void   LF_SHELV_CALC_COEFF(S2_FLT *f){
+  float K, den;
 
   K = tan(PI*f->fc*f->fs);
-  f->V0 = pow(10.0f, G/20.0f);
   if (f->V0 > 1.0f){
     den = 1.0f + sqrt(2) * K + K * K;
     f->a0 = (1.0f + sqrt(2*f->V0) * K + f->V0 * K * K) /den ;
@@ -302,12 +350,26 @@ void LF_SHELV_Set_G(S2_FLT *f, const float G){
     f->b0 = 0.0f ;
     f->b1 = 0.0f ;
     f->b2 = 0.0f;
- 
   }
+
 }
 
-void LF_SHELV_Set_FC(S2_FLT *f, const float G){
-// TODO
+void LF_SHELV_Set_G(S2_FLT *f, const float v0){
+
+  //f->V0 = pow(10.0f, G/20.0f);
+  f->V0 = v0;
+
+  LF_SHELV_CALC_COEFF(f);
+}
+
+void LF_SHELV_Set_FC(S2_FLT *f, const float fc){
+
+  if (fc < f->fs / 2.0f)	
+    f->fc = fc;
+  else
+    f->fc = f->fs / 2.0f;
+
+  LF_SHELV_CALC_COEFF(f);
 }
 
 float LF_SHELV_R (S2_FLT *f, const float inp){
@@ -329,12 +391,11 @@ S2_FLT *HF_SHELV_C (const float fc, const float fs){
  return LF_SHELV_C (fc,  fs);
 }
 
-void HF_SHELV_Set_G(S2_FLT *f, const float G){
+void HF_SHELV_CALC_COEFF(S2_FLT *f){
   float K;
   float den;
 
   K = tan(PI*f->fc*f->fs);
-  f->V0 = pow(10.0f, G/20.0f);
   if (f->V0 > 1.0f){
     den = 1.0f + sqrt(2) * K + K * K;
     f->a0 = (f->V0   + sqrt(2*f->V0) * K + K * K) /den ;
@@ -360,12 +421,17 @@ void HF_SHELV_Set_G(S2_FLT *f, const float G){
     f->b0 = 0.0f ;
     f->b1 = 0.0f ;
     f->b2 = 0.0f;
- 
   }
 }
 
-void HF_SHELV_Set_FC(S2_FLT *f, const float G){
-// TODO
+void HF_SHELV_Set_G(S2_FLT *f, const float v0){
+  f->V0 = v0;
+  HF_SHELV_CALC_COEFF(f);
+}
+
+void HF_SHELV_Set_FC(S2_FLT *f, const float fc){
+  S2_FLT_SET_FC(f, fc);
+  HF_SHELV_CALC_COEFF(f);
 }
 
 float HF_SHELV_R (S2_FLT *f, const float inp){
@@ -382,23 +448,65 @@ void HF_SHELV_D (S2_FLT *f){
 /*
  *  PEAK
  */
-S2_FLT *PEAK_C (const float fc, const float fs){
-  S2_FLT *f = (S2_FLT *) calloc(1, sizeof(S2_FLT));
-  f->fs = fs;
-  f->fc = fc;
+void PEAK_CALC_COEFF(S2_FLT *f){
+  float K;
+  float den;
+  float Qinf;
 
+  Qinf = 2.13f; //TODO
+
+  K = tan(PI*f->fc*f->fs);
+
+  if (f->V0 > 1.0f){
+    den = 1.0f +  K / Qinf + K * K;
+
+    f->a0 = (1.0f + f->V0 * K / Qinf + K * K) /den ;
+    f->a1 = 2.0f * (K*K - 1.0f) /den;
+    f->a2 =  (1.0f - f->V0 * K / Qinf + K * K)/den ;
+
+    f->b0 = 1.0f;
+    f->b1 = 2.0f * (K*K - 1.0f) / den;
+    f->b2 =  (1.0f -  K / Qinf + K * K) /den ;
+  } else if (f->V0 < 1.0f) {
+    den = 1.0f + f->V0 * K / Qinf + K * K;
+
+    f->a0 = (1.0f +  K / Qinf +  K * K) /den ;
+    f->a1 = 2.0f * (K*K - 1.0f) /den;
+    f->a2 =  (1.0f -  K / Qinf + K * K) /den ;
+
+    f->b0 = 1.0f;
+    f->b1 = 2.0f * (K*K - 1.0f);
+    f->b2 =  (1.0f - f->V0 * K / Qinf + K * K ) /den ;
+  }  else {
+    f->a0 = 1.0f;
+    f->a1 = 0.0f;
+    f->a2 = 0.0f ;
+    f->b0 = 0.0f ;
+    f->b1 = 0.0f ;
+    f->b2 = 0.0f;
+  }
+}
+
+
+S2_FLT *PEAK_C (const float fc, const float fs){
+  S2_FLT *f = LF_SHELV_C (fc,  fs);
   return f;
 }
-void PEAK_Set_G (S2_FLT *f, const float g){
 
-//TODO
+void PEAK_Set_G (S2_FLT *f, const float v0){
+  f->V0 = v0;
+  PEAK_CALC_COEFF(f);
 }
-void PEAK_Set_FC (S2_FLT *f, const float g){
-//TODO
+
+void PEAK_Set_FC (S2_FLT *f, const float fc){
+  S2_FLT_SET_FC(f, fc); 
+  PEAK_CALC_COEFF(f);
 }
+
 float PEAK_R (S2_FLT *f, const float inp){
   return S2_FLT_R(f, inp);
 }
+
 void PEAK_D (S2_FLT *f){
   S2_FLT_D(f);
 }

@@ -163,12 +163,12 @@ void HPF_SET_COEFF(S2_FLT *f){
   K = tan(PI*f->fc*f->fs);
   den = 1.0f + sqrt(2.0f)*K + K*K;
   f->a0 = 1.0 / den;
-  f->a1 = -1.0 / den;
+  f->a1 = -2.0 / den;
   f->a2 = 1.0 / den;
 
   f->b0 = 1.0f;
   f->b1 = 2.0f*(K*K -1.0f) / den;
-  f->b2 = 1.0f + K*K-sqrt(2.0f)*K / den;
+  f->b2 = 1.0f - K*K-sqrt(2.0f)*K / den;
 }
 
 S2_FLT *HPF_C (const float fc, const float fs){
@@ -206,6 +206,21 @@ void HPF_D (S2_FLT *f){
  ************************/
 void LPF_SET_COEFF(S2_FLT *f, const float fc){
 // TODO
+//
+  float K;
+  float den;
+
+
+  K = tan(PI*f->fc*f->fs);
+  den = 1.0f + sqrt(2.0f)*K + K*K;
+  f->a0 = K * K / den;
+  f->a1 = 2.0 * f->a0;
+  f->a2 = f->a0;
+
+  f->b0 = 1.0f;
+  f->b1 = 2.0f * (K*K -1.0f) / den;
+  f->b2 = 1.0f - K*K-sqrt(2.0f)*K / den;
+
 }
 
 S2_FLT *LPF_C (const float fc, const float fs){
@@ -241,14 +256,14 @@ void BPF_CALC_COEFF(S2_FLT *f){
 
 
   K = tan(PI*f->fc*f->fs);
-  den = 1.0f + K/f->Q + K*K;
+  den = 1.0f + K / f->Q + K*K;
   f->a0 = K/ (f->Q*den);
   f->a1 = 0.0;
   f->a2 = -f->a0;
 
   f->b0 = 1.0f;
   f->b1 = 2.0f*(K*K -1.0f) / den;
-  f->b2 = 1.0f + K*K-K/f->Q / den;
+  f->b2 = 1.0f -K/f->Q + K*K / den;
 
 
 }
@@ -296,6 +311,41 @@ void BPF_D (S2_FLT *f){
 /*
  * Low Freq Shelving
  */
+
+void   LF_SHELV_CALC_COEFF(S2_FLT *f){
+  float K, den;
+
+  K = tan(PI*f->fc*f->fs);
+  if (f->V0 > 1.0f){
+    den = 1.0f + sqrt(2) * K + K * K;
+
+    f->a0 = (1.0f + sqrt(2*f->V0) * K + f->V0 * K * K) /den ;
+    f->a1 = 2.0f * (f->V0*K*K - 1.0f) /den;
+    f->a2 =  (1.0f - sqrt(2*f->V0) * K + f->V0 * K * K) /den ;
+
+    f->b0 = 1.0f;
+    f->b1 = 2.0f * (K*K - 1.0f) / den;
+    f->b2 =  (1.0f - sqrt(2) * K + K * K) /den ;
+  } else if (f->V0 < 1.0f) {
+    den = 1.0f + sqrt(2*f->V0) * K + f->V0 * K * K;
+
+    f->a0 = (1.0f + sqrt(2) * K + K * K) /den ;
+    f->a1 = 2.0f * (K*K - 1.0f) /den;
+    f->a2 =  (1.0f - sqrt(2) * K + K * K) /den ;
+
+    f->b0 = 1.0f;
+    f->b1 = 2.0f * (f->V0*K*K - 1.0f) / den;
+    f->b2 =  (1.0f - sqrt(2*f->V0) * K + f->V0*K * K) /den ;
+  }  else {
+    f->a0 = 1.0f;
+    f->a1 = 0.0f;
+    f->a2 = 0.0f ;
+    f->b0 = 0.0f ;
+    f->b1 = 0.0f ;
+    f->b2 = 0.0f;
+  }
+}
+
 S2_FLT *LF_SHELV_C (const float fc, const float fs){
 
   S2_FLT *f = (S2_FLT *) calloc(1, sizeof(S2_FLT));
@@ -315,37 +365,6 @@ S2_FLT *LF_SHELV_C (const float fc, const float fs){
   f->b1 = 0.0f; // 2.0f*(K*K -1.0f) / den;
   f->b2 = 0.0f; // 1.0f + K*K-sqrt(2.0f)*K / den;
   return f;
-}
-
-void   LF_SHELV_CALC_COEFF(S2_FLT *f){
-  float K, den;
-
-  K = tan(PI*f->fc*f->fs);
-  if (f->V0 > 1.0f){
-    den = 1.0f + sqrt(2) * K + K * K;
-    f->a0 = (1.0f + sqrt(2*f->V0) * K + f->V0 * K * K) /den ;
-    f->a1 = 2.0f * (f->V0*K*K - 1.0f) /den;
-    f->a2 =  (1.0f - sqrt(2*f->V0) * K + f->V0 * K * K) /den ;
-    f->b0 = 1.0f;
-    f->b1 = 2.0f * (K*K - 1.0f) / den;
-    f->b2 =  (1.0f - sqrt(2) * K + K * K) /den ;
-  } else if (f->V0 < 1.0f) {
-    den = 1.0f + sqrt(2*f->V0) * K + K * K;
-    f->a0 = (1.0f + sqrt(2) * K + f->V0 * K * K) /den ;
-    f->a1 = 2.0f * (K*K - 1.0f) /den;
-    f->a2 =  (1.0f - sqrt(2) * K + K * K) /den ;
-    f->b0 = 1.0f;
-    f->b1 = 2.0f * (f->V0*K*K - 1.0f) / den;
-    f->b2 =  (1.0f - sqrt(2*f->V0) * K + f->V0*K * K) /den ;
-  }  else {
-    f->a0 = 1.0f;
-    f->a1 = 0.0f;
-    f->a2 = 0.0f ;
-    f->b0 = 0.0f ;
-    f->b1 = 0.0f ;
-    f->b2 = 0.0f;
-  }
-
 }
 
 void LF_SHELV_Set_G(S2_FLT *f, const float v0){
@@ -377,9 +396,7 @@ void LF_SHELV_D (S2_FLT *f){
 /*
  * HIGH Freq Shelving
  */
-S2_FLT *HF_SHELV_C (const float fc, const float fs){
- return LF_SHELV_C (fc,  fs);
-}
+
 
 void HF_SHELV_CALC_COEFF(S2_FLT *f){
   float K;
@@ -388,22 +405,29 @@ void HF_SHELV_CALC_COEFF(S2_FLT *f){
   K = tan(PI*f->fc*f->fs);
   if (f->V0 > 1.0f){
     den = 1.0f + sqrt(2) * K + K * K;
+
     f->a0 = (f->V0   + sqrt(2*f->V0) * K + K * K) /den ;
     f->a1 = 2.0f * (K*K - f->V0) /den;
     f->a2 =  (f->V0 - sqrt(2*f->V0) * K + K * K) /den ;
+
     f->b0 = 1.0f;
     f->b1 = 2.0f * (K*K - 1.0f) / den;
     f->b2 =  (1.0f - sqrt(2) * K + K * K) /den ;
+
   } else if (f->V0 < 1.0f) {
+
     den = f->V0 + sqrt(2*f->V0) * K + K * K;
+
     f->a0 = (1.0f + sqrt(2) * K +  K * K) /den ;
     f->a1 = 2.0f * (K*K - 1.0f) /den;
     f->a2 =  (1.0f - sqrt(2) * K + K * K) /den ;
 
-    den = f->V0 + sqrt(2/f->V0) * K + K * K;
+    den = 1.0f + sqrt(2/f->V0) * K + K * K / f->V0;
+
     f->b0 = 1.0f;
     f->b1 = 2.0f * (K*K/ f->V0 - 1.0f);
     f->b2 =  (1.0f - sqrt(2/f->V0) * K + K * K / f->V0) /den ;
+
   }  else {
     f->a0 = 1.0f;
     f->a1 = 0.0f;
@@ -412,6 +436,10 @@ void HF_SHELV_CALC_COEFF(S2_FLT *f){
     f->b1 = 0.0f ;
     f->b2 = 0.0f;
   }
+}
+
+S2_FLT *HF_SHELV_C (const float fc, const float fs){
+ return LF_SHELV_C (fc,  fs);
 }
 
 void HF_SHELV_Set_G(S2_FLT *f, const float v0){

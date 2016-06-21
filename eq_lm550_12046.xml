@@ -43,9 +43,9 @@
       eqLm550->mpkf= (int)f2Fc;
       eqLm550->hpkf= (int)f3Fc;
 
-      eqLm550->lpkG = DB_CO(f1Gain);
-      eqLm550->mpkG = DB_CO(f2Gain);
-      eqLm550->hpkG=  DB_CO(f3Gain);
+      eqLm550->lpkG = DB_CO(f1Gain); // TODO
+      eqLm550->mpkG = DB_CO(f2Gain); // TODO
+      eqLm550->hpkG=  DB_CO(f3Gain); // TODO
 
       eqLm550->bpfON = 0;
       eqLm550->lshON = 0;
@@ -56,7 +56,7 @@
 
       for (pos = 0; pos < sample_count; pos++) {
 
-	out = (input[pos] * (1 - dryWet) + dryWet * EQLM550_R(eqLm550, input[pos] *iGain))  * oGain;
+        out = f_dryWet(input[pos], EQLM550_R(eqLm550, input[pos] *iGain), dryWet)* oGain;
 	buffer_write(output[pos], out);
 
 	*(plugin_data->guiRMSInp) = 20*log10(rms_filter_process(rmsFilterINP , input[pos] * iGain) + 0.001f);

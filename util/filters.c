@@ -205,8 +205,6 @@ void HPF_D (S2_FLT *f){
  *
  ************************/
 void LPF_SET_COEFF(S2_FLT *f, const float fc){
-// TODO
-//
   float K;
   float den;
 

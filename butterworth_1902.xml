@@ -2,21 +2,21 @@
 <!DOCTYPE ladspa SYSTEM "ladspa-swh.dtd">
 <?xml-stylesheet href="ladspa.css" type="text/css" ?>
 <ladspa>
-	<global>
-		<meta name="maker" value="Alexander Ehlert &lt;mag@glame.de&gt;"/>
-		<meta name="copyright" value="GPL"/>
-		<meta name="properties" value="HARD_RT_CAPABLE"/>
-		<code>
-			#include "config.h"
-			#include "util/iir.h"
-                        #include "util/buffer.h"
-		</code>
-	</global>
+<global>
+	<meta name="maker" value="Alexander Ehlert &lt;mag@glame.de&gt;"/>
+	<meta name="copyright" value="GPL"/>
+	<meta name="properties" value="HARD_RT_CAPABLE"/>
+	<code>
+		#include "config.h"
+		#include "util/iir.h"
+                       #include "util/buffer.h"
+	</code>
+</global>
 
-	<plugin label="bwxover_iir" id="1902" class="BandpassPlugin">
-		<name>Glame Butterworth X-over Filter</name>
-                <p> Butterworth X-over filter
-                </p>
+<plugin label="bwxover_iir" id="1902" class="BandpassPlugin">
+	<name>Glame Butterworth X-over Filter</name>
+               <p> Butterworth X-over filter
+               </p>
 
                 <callback event="instantiate">
                   sample_rate = s_rate;

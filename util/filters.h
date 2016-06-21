@@ -14,18 +14,17 @@ typedef struct {
    float mout;
    float coef1;
    float coef2;
+}LPF_6db;
 
-}low_pass_filter;
-
-low_pass_filter *low_pass_filter_new(const float fc, const float sr);
-float low_pass_filter_process (low_pass_filter *lp, float inp);
-void low_pass_filter_free(low_pass_filter *lpf);
+LPF_6db *LPF_6db_C(const float fc, const float sr);
+float LPF_6db_R(LPF_6db *lp, float inp);
+void LPF_6db_D(LPF_6db *lpf);
 
 typedef struct {
    float fc;
    float sr;
-   low_pass_filter * filter1;
-   low_pass_filter * filter2;
+   LPF_6db * filter1;
+   LPF_6db * filter2;
 }rms_filter;
 
 
@@ -39,8 +38,8 @@ typedef struct {
    float attackState;
    float releaseState;
    float sr;
-   low_pass_filter * attackFilter;
-   low_pass_filter * releaseFilter;
+   LPF_6db * attackFilter;
+   LPF_6db * releaseFilter;
 }dynamics_filter;
 
 dynamics_filter *dynamics_filter_new(const float attack_time, 
@@ -52,4 +51,72 @@ void dynamics_filter_set_attack_time (dynamics_filter *dyn, const float attack_t
 void dynamics_filter_set_release_time (dynamics_filter *dyn, const float release_time);
 
 float dynamics_filter_gain1 (dynamics_filter *dyn, const float gain_limit);
+
+
+typedef struct {
+   float fc;
+   float fs;
+   float minp, mminp;
+   float mout, mmout;
+   float a0, a1, a2;
+   float b0, b1, b2;
+   float V0;
+   float Q;
+}S2_FLT;
+
+float S2_FLT_R (S2_FLT *f, float inp);
+void S2_FLT_D (S2_FLT *f);
+void S2_FLT_SET_FC (S2_FLT *f, const float fc);
+
+/*
+ * High Pass Filter
+ */
+S2_FLT *HPF_C (const float fc, const float fs);
+float HPF_R (S2_FLT *lp, float inp);
+void HPF_D (S2_FLT *f);
+
+/*
+ * Low Pass Filter
+ */
+S2_FLT *LPF_C (const float fc, const float fs);
+float LPF_R (S2_FLT *lp, float inp);
+void LPF_D (S2_FLT *f);
+
+/*
+ * Band Pass Filter
+ */
+S2_FLT *BPF_C (const float fc, const float q, const float fs);
+void BPF_Set_Fc(S2_FLT *f, const float fc);
+void BPF_Set_Q(S2_FLT *f, const float fc);
+float BPF_R (S2_FLT *lp, float inp);
+void BPF_D (S2_FLT *f);
+
+/*
+ * Low Shelving Filter
+ */
+S2_FLT *LF_SHELV_C (const float fc, const float fs);
+void LF_SHELV_Set_G (S2_FLT *, const float);
+void LF_SHELV_Set_FC (S2_FLT *, const float);
+float LF_SHELV_R (S2_FLT *, const float);
+void LF_SHELV_D (S2_FLT *);
+
+/*
+ * High Shelving Filter
+ */
+S2_FLT *HF_SHELV_C (const float fc, const float fs);
+void HF_SHELV_Set_G (S2_FLT *, const float);
+void HF_SHELV_Set_FC (S2_FLT *, const float);
+float HF_SHELV_R (S2_FLT *, const float);
+void HF_SHELV_D (S2_FLT *);
+
+/*
+ * Peak Filter
+ */
+S2_FLT *PEAK_C (const float fc, const float fs);
+void PEAK_Set_G (S2_FLT *, const float);
+void PEAK_Set_FC (S2_FLT *, const float);
+void PEAK_Set_PropQ (S2_FLT *, const float);
+void PEAK_Set_Q (S2_FLT *, const float);
+float PEAK_R (S2_FLT *, const float);
+void PEAK_D (S2_FLT *);
 #endif

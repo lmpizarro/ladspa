@@ -2,92 +2,68 @@
 <!DOCTYPE ladspa SYSTEM "ladspa-swh.dtd">
 <?xml-stylesheet href="ladspa.css" type="text/css" ?>
 <ladspa>
-	<global>
-		<meta name="maker" value="Luis Maria Pizarro&lt;lmpizarro@gmail.com&gt;"/>
-		<meta name="copyright" value="GPL"/>
-		<meta name="properties" value="HARD_RT_CAPABLE"/>
+<global>
+	<meta name="maker" value="Luis Maria Pizarro&lt;lmpizarro@gmail.com&gt;"/>
+	<meta name="copyright" value="GPL"/>
+	<meta name="properties" value="HARD_RT_CAPABLE"/>
     <code>
-      #include "ladspa-util.h"
-
+	    //#include "config.h"
+     #include "ladspa-util.h"
     </code>
-	</global>
+</global>
 
-	<plugin label="colourSigmoid" id="12041" class="colour">
+<plugin label="colourSigmoid" id="12041" class="UtilityPlugin">
 		<name>Colour Sigmoid</name>
 		<p>Colouring with a Sigmoid function</p>
 
-		<callback event="activate"><![CDATA[
-
-			atten = 1.0f;
-			]]></callback>
-
-		<callback event="instantiate"><![CDATA[
-
-			atten = 1.0f;
-			]]></callback>
 
 
+<callback event="run"><![CDATA[
+	unsigned long pos;
+	float maxv;
+	float coef;
+	float out;
+	float x;
 
+	maxv =  (2.0f / (1.0f + exp(-drive))) - 1.0f;
+	coef = DB_CO((float)outGain);
 
-		<callback event="run"><![CDATA[
-			unsigned long pos;
-			float maxv;
-			float coef;
-                        LADSPA_Data out;
+	for (pos = 0; pos < sample_count; pos++) {
+	        x = input[pos];
+		out = coef*(input[pos]*(1-wet) +  ((2.0f / (1.0f + exp(-drive*x)) - 1.0f)/ maxv)*wet);
 
-			maxv =  (2.0f / (1.0f + exp(-drive))) - 1.0f;
-			coef = DB_CO(outGain);
+		buffer_write(output[pos], out );
 
-			for (pos = 0; pos < sample_count; pos++) {
-			        LADSPA_Data x = input[pos];
-				out = coef*(input[pos]*(1-wet) +  ((2.0f / (1.0f + exp(-drive*x)) - 1.0f)/ maxv)*wet);
-
-				atten = out / x;
-				buffer_write(output[pos], out );
-
-				plugin_data->atten = atten;
-				*(plugin_data->attenuation) = CO_DB(atten);
-				}
-			]]></callback>
-
-    <port label="attenuation" dir="output" type="control">
-      <name>Stage Gain (dB)</name>
-      <p>The current Gain of the signal coming out of the Colour module.</p>
-      <range min="-15" max="15"/>
-    </port>
+	}
+]]></callback>
 
 
     <port label="outGain" dir="input" type="control" hint="default_0">
       <name>Out Gain (dB)</name>
       <p>Control out intensity</p>
-      <range min="-40" max="40"/>
+      <range min="-40" max="+40"/>
     </port>
-
-
-
 
      <port label="drive" dir="input" type="control" hint="default_minimum">
 			<name>Exponent</name>
-			<range min="0.01" max="2"/>
 			<p>Controls the slope of the sigmoid.</p>
+			<range min="+0.01" max="+2"/>
       </port>
 
       <port label="wet" dir="input" type="control" hint="default_minimum">
 			<name>Wet</name>
-			<range min="0" max="1"/>
 			<p>Controls the amount of wet.</p>
+			<range min="0" max="+1"/>
       </port>
 
-
-		<port label="input" dir="input" type="audio">
+	<port label="input" dir="input" type="audio">
 			<name>Input</name>
-		</port>
+	</port>
 
-		<port label="output" dir="output" type="audio">
+	<port label="output" dir="output" type="audio">
 			<name>Output</name>
-		</port>
+	</port>
 
 
-                <instance-data label="atten" type="float" />
 	</plugin>
 </ladspa>

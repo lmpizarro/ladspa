@@ -1,0 +1,159 @@
+<?xml version="1.0"?>
+<!DOCTYPE ladspa SYSTEM "ladspa-swh.dtd">
+<?xml-stylesheet href="ladspa.css" type="text/css"?>
+<ladspa>
+  <global>
+    <meta name="maker" value=" Luis Maria Pizarro &lt;lmpizarro@gmail.com&gt;"/>
+    <meta name="copyright" value="GPL"/>
+    <meta name="properties" value="HARD_RT_CAPABLE"/>
+    <code>
+      #include "ladspa-util.h"
+      #include "util/db.h"
+      #include "util/filters.h"
+      #include "util/eqlm550a.h"
+    </code>
+  </global>
+
+  <plugin label="eq_lm550" id="12046" class="FilterPlugin">
+    <name>eq_lm550</name>
+    <p>A plugin that implements the </p>
+
+    <callback event="instantiate"><![CDATA[
+      rmsFilterINP = rms_filter_new(5.0f, s_rate);
+      rmsFilterOUT = rms_filter_new(5.0f, s_rate);
+      eqLm550 = EQLM550_C(s_rate);
+    ]]></callback>
+
+    <callback event="activate"> 
+    </callback>
+
+    <callback event="cleanup">
+       rms_filter_free(plugin_data->rmsFilterINP);
+       rms_filter_free(plugin_data->rmsFilterOUT);
+       EQLM550_D(plugin_data->eqLm550);
+    </callback>
+
+    <callback event="run"><![CDATA[
+      unsigned long pos;
+      float iGain = DB_CO(inputGain);
+      float oGain = DB_CO(outputGain);
+      float out;
+
+      eqLm550->lpkf = (int)f1Fc;
+      eqLm550->mpkf= (int)f2Fc;
+      eqLm550->hpkf= (int)f3Fc;
+
+      eqLm550->lpkG = DB_CO(f1Gain);
+      eqLm550->mpkG = DB_CO(f2Gain);
+      eqLm550->hpkG=  DB_CO(f3Gain);
+
+      eqLm550->bpfON = 0;
+      eqLm550->lshON = 0;
+      eqLm550->hshON= 0;
+      if (BPON == 1) eqLm550->bpfON = 1;
+      if (LFSHON == 1) eqLm550->lshON = 1;
+      if (HFSHON == 1) eqLm550->hshON= 1;
+
+      for (pos = 0; pos < sample_count; pos++) {
+
+	out = (input[pos] * (1 - dryWet) + dryWet * EQLM550_R(eqLm550, input[pos] *iGain))  * oGain;
+	buffer_write(output[pos], out);
+
+	*(plugin_data->guiRMSInp) = 20*log10(rms_filter_process(rmsFilterINP , input[pos] * iGain) + 0.001f);
+
+        *(plugin_data->guiRMSOut) = 20*log10(rms_filter_process(rmsFilterOUT , output[pos]) + 0.001f);
+      }
+      ]]></callback>
+
+    <port label="inputGain" dir="input" type="control" hint="default_0">
+      <name>InGain</name>
+      <p>Controls the gain of the input signal in dB's.</p>
+      <range min="-12" max="+12"/>
+    </port>
+
+    <port label="f1Fc" dir="input" type="control" hint="default_middle, integer">
+	<name>f1Fc Khz(0=.03, 1=.04, 2=.05, 3=.1, 4=.2, 5=.3, 6=.4)</name>
+	<range min="0" max="6"/>
+    </port>
+
+    <port label="f1Gain" dir="input" type="control" hint="integer,default_0">
+      <name>p1Gain DB(-5|-12 -4|-9 -3|-6 -2|-4 -1|-2 0|0 1|2 2|4 3|6 4|9 5|12)</name>
+      <p>Controls the gain of the peak 1 filter.</p>
+      <range min="-5" max="+5"/>
+    </port>
+
+    <port label="f2Fc" dir="input" type="control" hint="integer,default_middle">
+	<name>f2Fc Khz(0|.2, 1|.4, 2|.6, 3|.8, 4|1.5, 5|3.0, 6|5.0)</name>
+	<range min="0" max="6"/>
+    </port>
+
+    <port label="f2Gain" dir="input" type="control" hint="integer,default_0">
+      <name>p2Gain DB(-5|-12 -4|-9 -3|-6 -2|-4 -1|-2 0|0 1|2 2|4 3|6 4|9 5|12)</name>
+      <p>Controls the gain of the peak 2 filter.</p>
+      <range min="-5" max="+5"/>
+    </port>
+
+    <port label="f3Fc" dir="input" type="control" hint="integer,default_middle">
+	<name>f3Fc Khz (0|2.5, 1|5.0, 2|7.0, 3|10.0, 4|12.5, 5|15.0, 6|20.0)</name>
+	<range min="0" max="6"/>
+    </port>
+
+    <port label="f3Gain" dir="input" type="control" hint="integer,default_0">
+      <name>p3Gain DB(-5|-12 -4|-9 -3|-6 -2|-4 -1|-2 0|0 1|2 2|4 3|6 4|9 5|12)</name>
+      <p>Controls the gain of the peak 3 filter.</p>
+      <range min="-5" max="+5"/>
+    </port>
+
+    <port label="outputGain" dir="input" type="control" hint="default_0">
+      <name>OutGain</name>
+      <p>Controls the gain of the output signal in dB's.</p>
+      <range min="-12" max="+12"/>
+    </port>
+
+    <port label="dryWet" dir="input" type="control" hint="default_0">
+      <name>Dry/Wet</name>
+      <p>Controls the gain of the output signal in dB's.</p>
+      <range min="0" max="+1"/>
+    </port>
+
+    <port label="BPON" dir="input" type="control" hint="integer,default_0">
+      <name>BP active(0 = ON, 1 = OFF)</name>
+      <p>BP 50 15Kz activate</p>
+      <range min="0" max="1"/>
+    </port>
+    <port label="LFSHON" dir="input" type="control" hint="integer,default_0">
+      <name>LFSH active(0 = ON, 1 = OFF)</name>
+      <p>activate LFSH or PEAK</p>
+      <range min="0" max="1"/>
+    </port>
+    <port label="HFSHON" dir="input" type="control" hint="integer,default_0">
+      <name>HFSH active(0 = ON, 1 = OFF)</name>
+      <p>activate HFSH or PEAK</p>
+      <range min="0" max="1"/>
+    </port>
+
+    <port label="input" dir="input" type="audio">
+      <name>Input</name>
+    </port> 
+
+    <port label="output" dir="output" type="audio">
+      <name>Output</name>
+    </port>
+
+    <port label="guiRMSInp" dir="output" type="control">
+      <name>InRMS (dB)</name>
+      <p>The level of the input signal, in decibels.</p>
+      <range min="-40" max="+12"/>
+    </port>
+
+    <port label="guiRMSOut" dir="output" type="control">
+      <name>OutRMS (dB)</name>
+      <p>The level of the input signal, in decibels.</p>
+      <range min="-40" max="+12"/>
+    </port>
+
+    <instance-data label="rmsFilterINP" type="rms_filter *"/>
+    <instance-data label="rmsFilterOUT" type="rms_filter *"/>
+    <instance-data label="eqLm550" type="EQLM550 *"/>
+  </plugin>
+</ladspa>

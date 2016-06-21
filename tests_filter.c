@@ -112,11 +112,11 @@ int test_dyn_filters(){
        data[i] = 0.7f;
    } 
 
-   for (i = 2*N/5; i < 3*N/5; i++){
+   for (i = 2*N/5; i < 4*N/5; i++){
        data[i] = 0.2f;
    } 
 
-   for (i = 3*N/5; i < 4*N/5; i++){
+   for (i = 4*N/5; i < 4*N/5; i++){
        data[i] = 0.5f;
    } 
 

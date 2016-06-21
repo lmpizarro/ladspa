@@ -519,6 +519,9 @@ void PEAK_D (S2_FLT *f){
   S2_FLT_D(f);
 }
 
+float f_dryWet(const float dry, const float wet, const float alfa){
+  return dry * (1 -alfa) + wet * alfa;
+}
+
 /*
- *  END PEAK
- */
+ *  END PEAK */

@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include "util/filters.h"
 #include "util/eqlm550a.h"
+#include "stdio.h"
 
 // gcc -o main tests_filter.c  -lm -Lutil -leqlm550a -lfilters
 
@@ -179,6 +180,7 @@ int main (){
    //test_rms();
    //test_dyn_filters();
    //test_lp_filter();
-  test_eq550(); 
+   test_eq550()
+
    return (0);
 }

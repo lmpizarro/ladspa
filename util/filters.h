@@ -119,4 +119,10 @@ void PEAK_Set_PropQ (S2_FLT *, const float);
 void PEAK_Set_Q (S2_FLT *, const float);
 float PEAK_R (S2_FLT *, const float);
 void PEAK_D (S2_FLT *);
+
+/*
+ * Dry/Wet
+ * */
+
+float f_dryWet(const float dry, const float wet, const float alfa);
 #endif

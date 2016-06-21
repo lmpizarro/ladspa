@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
 #include "filters.h"
 
 /*
@@ -37,7 +36,6 @@ float LPF_6db_R (LPF_6db *lp, float inp){
 void LPF_6db_D(LPF_6db *lpf){
   free(lpf);
 }
-
 
 /*****************
 *   

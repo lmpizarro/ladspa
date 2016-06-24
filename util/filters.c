@@ -116,11 +116,12 @@ void dynamics_filter_set_release_time (dynamics_filter *dyn, const float release
 }
 
 float dynamics_filter_gain1 (dynamics_filter *dyn, const float gain) {
-   float rel, att;
-  
+   float rel, att, sqGain;
+ 
+   sqGain = sqrt(gain); 
    att = dyn->attackState;  
    rel = dyn->releaseState;  
-   return ((1.0f- gain)*rel + gain)*((gain - 1.0f)*att + 1.0f);
+   return ((1.0f- gain)*rel + sqGain)*((sqGain - 1.0f)*att + 1.0f);
 }
 
 
@@ -579,8 +580,10 @@ void CMPR_D (CMPR *f){
 }
 
 float sign(const float n){
-   if (n<0) return -1.0f;
-   if (n>=0) return 1.0f;
+   int s;
+   if (n<0) s = -1.0f;
+   if (n>=0) s = 1.0f;
+   return s;
 }
 
 float CMPR_R (CMPR *f, const float inp){

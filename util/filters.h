@@ -145,5 +145,6 @@ typedef struct {
 CMPR *CMPR_C (const float dbThr, const float dbN, const float dbKn);
 void CMPR_D (CMPR *);
 float CMPR_R (CMPR *, const float inp);
+void CMPR_Set_TNK(CMPR * f, const float dbThr, const float N, const float dbKn);
 
 #endif

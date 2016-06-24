@@ -547,22 +547,29 @@ float f_dryWet(const float dry, const float wet, const float alfa){
   return dry * (1 -alfa) + wet * alfa;
 }
 
+
+void CMPR_Set_TNK(CMPR * f, const float dbThr, const float N, const float dbKn){
+  f->dbThr = dbThr;
+  f->dbKn = dbKn;
+  f->N = N;
+
+  f->dbThrK1 = dbThr - dbKn;
+  f->dbThrK2 = dbThr + dbKn;
+
+  f->Np = 2 * N/ (1 + N);
+
+  f->linThr =  pow(10.0f, f->dbThr / 20.0f);
+  f->linThrK1 =  pow(10.0f, (f->dbThrK1) / 20.0f);
+  f->linThrK2 =  pow(10.0f, (f->dbThrK2) / 20.0f);
+}
+
+
 CMPR *CMPR_C (const float dbThr, const float N, const float dbKn)
 {
 
   CMPR *f = (CMPR *) calloc(1, sizeof(CMPR));
 
-  f->dbThr = dbThr;
-  f->dbKn = dbKn;
-  f->dbThrK1 = dbThr - dbKn;
-  f->dbThrK2 = dbThr + dbKn;
-
-  f->N = N;
-  f->Np = 2 * N/ (1 + N);
-
-  f->linThr =  pow(10.0f, dbThr / 20.0f);
-  f->linThrK1 =  pow(10.0f, (f->dbThrK1) / 20.0f);
-  f->linThrK2 =  pow(10.0f, (f->dbThrK2) / 20.0f);
+  CMPR_Set_TNK(f, dbThr, N, dbKn);
 
   return f;
 }

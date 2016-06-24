@@ -134,6 +134,7 @@ typedef struct {
    float N;
    float Np;
 
+   float linThr;
    float linThrK1;
    float linThrK2;
 

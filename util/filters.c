@@ -554,14 +554,15 @@ CMPR *CMPR_C (const float dbThr, const float N, const float dbKn)
 
   f->dbThr = dbThr;
   f->dbKn = dbKn;
-  f->dbThrK1 = dbThr + dbKn;
-  f->dbThrK2 = dbThr - dbKn;
+  f->dbThrK1 = dbThr - dbKn;
+  f->dbThrK2 = dbThr + dbKn;
 
   f->N = N;
   f->Np = 2 * N/ (1 + N);
 
-  f->linThrK1 =  pow(10.0f, (dbThr + dbKn) / 20.0f);
-  f->linThrK2 =  pow(10.0f, (dbThr - dbKn) / 20.0f);
+  f->linThr =  pow(10.0f, dbThr / 20.0f);
+  f->linThrK1 =  pow(10.0f, (f->dbThrK1) / 20.0f);
+  f->linThrK2 =  pow(10.0f, (f->dbThrK2) / 20.0f);
 
   return f;
 }
@@ -570,16 +571,25 @@ void CMPR_D (CMPR *f){
    free(f);
 }
 
+float sign(const float n){
+   if (n<0) return -1.0f;
+   if (n>=0) return 1.0f;
+}
+
 float CMPR_R (CMPR *f, const float inp){
-   float out;
+   float out, absInp;
    out = 0.0f;
 
-   if (inp <= f->linThrK1)
-      out = inp;
-   else if (inp > f->linThrK1 && inp <= f->linThrK2)
-      out = pow(inp, 1.0f/f->Np) * pow(f->linThrK1, (f->Np - 1)/f->Np);
-   else if (inp > f->linThrK2 && inp <= 1.0f)
-      out = pow(inp, 1.0f/f->N) * pow(f->linThrK2, (f->N - 1)/f->N);
+   absInp = fabs(inp);
+
+   if (absInp <= f->linThrK1)
+      out = absInp;
+   else if (absInp > f->linThrK1 && absInp <= f->linThrK2)
+      out = pow(absInp, 1.0f/f->Np) * pow(f->linThrK1 , (f->Np - 1.0f)/f->Np);
+   else if (absInp > f->linThrK2 && absInp <= 1.0f)
+      out = pow(absInp, 1.0f/f->N) * pow(f->linThr, (f->N - 1.0f)/f->N);
+
+   out = out * sign(inp);
 
    return out;
 }

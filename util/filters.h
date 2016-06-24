@@ -124,4 +124,25 @@ void PEAK_D (S2_FLT *);
  * */
 
 float f_dryWet(const float dry, const float wet, const float alfa);
+
+typedef struct {
+   float dbThr;
+   float dbKn;
+   float dbThrK1;
+   float dbThrK2;
+
+   float N;
+   float Np;
+
+   float linThrK1;
+   float linThrK2;
+
+
+}CMPR;
+
+
+CMPR *CMPR_C (const float dbThr, const float dbN, const float dbKn);
+void CMPR_D (CMPR *);
+float CMPR_R (CMPR *, const float inp);
+
 #endif

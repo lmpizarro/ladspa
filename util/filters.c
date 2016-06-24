@@ -547,5 +547,42 @@ float f_dryWet(const float dry, const float wet, const float alfa){
   return dry * (1 -alfa) + wet * alfa;
 }
 
+CMPR *CMPR_C (const float dbThr, const float N, const float dbKn)
+{
+
+  CMPR *f = (CMPR *) calloc(1, sizeof(CMPR));
+
+  f->dbThr = dbThr;
+  f->dbKn = dbKn;
+  f->dbThrK1 = dbThr + dbKn;
+  f->dbThrK2 = dbThr - dbKn;
+
+  f->N = N;
+  f->Np = 2 * N/ (1 + N);
+
+  f->linThrK1 =  pow(10.0f, (dbThr + dbKn) / 20.0f);
+  f->linThrK2 =  pow(10.0f, (dbThr - dbKn) / 20.0f);
+
+  return f;
+}
+
+void CMPR_D (CMPR *f){
+   free(f);
+}
+
+float CMPR_R (CMPR *f, const float inp){
+   float out;
+   out = 0.0f;
+
+   if (inp <= f->linThrK1)
+      out = inp;
+   else if (inp > f->linThrK1 && inp <= f->linThrK2)
+      out = pow(inp, 1.0f/f->Np) * pow(f->linThrK1, (f->Np - 1)/f->Np);
+   else if (inp > f->linThrK2 && inp <= 1.0f)
+      out = pow(inp, 1.0f/f->N) * pow(f->linThrK2, (f->N - 1)/f->N);
+
+   return out;
+}
+
 /*
  *  END PEAK */

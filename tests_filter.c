@@ -299,6 +299,24 @@ int test_HPF ()
   return 0;
 }
 
+int test_cmpr(){
+
+  CMPR *c;
+  int i;
+
+  c = CMPR_C(-18.0f, 2.0f, -3.0f);
+
+  fprintf(stdout, "np %f tk1 db %f tk2 db %f\n", c->Np, c->dbThrK1, c->dbThrK2);
+  fprintf(stdout, "tk1 %f tk2 %f\n", c->linThrK1, c->linThrK2);
+
+  for (i = 0; i < 100; i++ )
+    fprintf(stdout, "%f %f \n",(float)i * 0.01f, CMPR_R(c, (float)i * 0.01f));
+
+
+  CMPR_D(c);
+
+  return 1;
+}
 
 int main (){
 
@@ -307,7 +325,7 @@ int main (){
    //test_lp_filter();
    //test_eq550();
    
-   test_HPF();
-
+   //test_HPF();
+   test_cmpr();
    return (0);
 }

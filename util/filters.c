@@ -555,7 +555,9 @@ void CMPR_Set_TNK(CMPR * f, const float dbThr, const float N, const float dbKn){
   f->N = N;
 
   f->dbThrK1 = dbThr - dbKn;
+  if (f->dbThrK1 < -60.0f) f->dbThrK1 = -60.0f;
   f->dbThrK2 = dbThr + dbKn;
+  if (f->dbThrK2 > 0.0f) f->dbThrK2 = 0.0f;
 
   f->Np = 2 * N/ (1 + N);
 

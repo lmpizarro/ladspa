@@ -304,13 +304,14 @@ int test_cmpr(){
   CMPR *c;
   int i;
 
-  c = CMPR_C(-48.0f, 1.0f, 9.0f);
+  //  CMPR_C(th,N,Kn)
+  c = CMPR_C(-8.0f, 3.5f, 9.0f);
 
   fprintf(stdout, "n % f np %f tk1 db %f tk2 db %f\n", c->N, c->Np, c->dbThrK1, c->dbThrK2);
   fprintf(stdout, "tk1 %f tk2 %f\n", c->linThrK1, c->linThrK2);
 
-  for (i = -100; i < 100; i++ )
-    fprintf(stdout, "%f %f \n",(float)i * 0.01f, CMPR_R(c, (float)i * 0.01f));
+  for (i = -10; i < 10; i++ )
+    fprintf(stdout, "%f %f \n",(float)i * 0.1f, CMPR_R(c, (float)i * 0.1f));
 
 
   CMPR_D(c);
